@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tutorial: Fade Into You - Mazzy Star</title>
+    <title>Tutorial: Three Little Birds - Bob Marley</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/mp4-muxer@5.1.3/build/mp4-muxer.min.js"></script>
@@ -44,20 +44,20 @@
         <!-- Indicador de Renderização (visível apenas ao exportar vídeo) -->
         <div id="recordingBadge" class="hidden absolute top-3 right-3 bg-purple-600/95 backdrop-blur text-white text-[11px] font-bold px-3 py-1 rounded-full flex items-center gap-1.5 shadow-lg">
             <span class="w-2 h-2 rounded-full bg-white animate-pulse"></span>
-            <span id="renderStatusText">Rendering 720p...</span>
+            <span id="renderStatusText">Gerando vídeo 720p...</span>
         </div>
 
         <!-- Controles na Base -->
         <div class="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/90 via-black/50 to-transparent flex items-center justify-between gap-2">
             <button id="playPauseBtn" class="flex-1 bg-purple-600 hover:bg-purple-500 active:scale-95 transition text-white font-semibold py-2.5 px-3 rounded-xl text-xs flex items-center justify-center gap-1.5 shadow-lg shadow-purple-900/40 cursor-pointer">
                 <span id="playIcon">▶</span>
-                <span id="playText">Play</span>
+                <span id="playText">Tocar</span>
             </button>
-            <button id="downloadBtn" class="bg-emerald-600 hover:bg-emerald-500 active:scale-95 transition text-white font-semibold py-2.5 px-3 rounded-xl text-xs flex items-center justify-center gap-1.5 shadow-lg shadow-emerald-900/40 cursor-pointer" title="Render and Download Video">
+            <button id="downloadBtn" class="bg-emerald-600 hover:bg-emerald-500 active:scale-95 transition text-white font-semibold py-2.5 px-3 rounded-xl text-xs flex items-center justify-center gap-1.5 shadow-lg shadow-emerald-900/40 cursor-pointer" title="Gerar e baixar vídeo">
                 <span>⬇</span>
-                <span id="downloadText">Download Video</span>
+                <span id="downloadText">Baixar vídeo</span>
             </button>
-            <button id="restartBtn" class="bg-zinc-800 hover:bg-zinc-700 active:scale-95 transition text-zinc-200 p-2.5 rounded-xl text-xs cursor-pointer" title="Restart">
+            <button id="restartBtn" class="bg-zinc-800 hover:bg-zinc-700 active:scale-95 transition text-zinc-200 p-2.5 rounded-xl text-xs cursor-pointer" title="Reiniciar">
                 ↺
             </button>
         </div>
@@ -91,11 +91,11 @@
             audioInitialized = true;
         }
 
-        // Definição dos acordes de "Fade Into You" (A, E, Bm, D)
+        // Acordes abertos de "Three Little Birds" (A, D e E)
         const CHORDS = {
             A: {
                 name: 'A',
-                fullName: 'A Major',
+                fullName: 'Lá maior',
                 notes: ['A2', 'E3', 'A3', 'C#4', 'E4'],
                 strings: ['X', '0', '2', '2', '2', '0'],
                 fingers: [
@@ -108,7 +108,7 @@
             },
             E: {
                 name: 'E',
-                fullName: 'E Major',
+                fullName: 'Mi maior',
                 notes: ['E2', 'B2', 'E3', 'G#3', 'B3', 'E4'],
                 strings: ['0', '2', '2', '1', '0', '0'],
                 fingers: [
@@ -119,22 +119,9 @@
                 barre: null,
                 color: '#818cf8'
             },
-            Bm: {
-                name: 'Bm',
-                fullName: 'B Minor',
-                notes: ['B2', 'F#3', 'B3', 'D4', 'F#4'],
-                strings: ['X', '2', '4', '4', '3', '2'],
-                fingers: [
-                    { string: 2, fret: 3, finger: '2' },
-                    { string: 4, fret: 4, finger: '3' },
-                    { string: 3, fret: 4, finger: '4' }
-                ],
-                barre: { fret: 2, fromString: 5, toString: 1, finger: '1' },
-                color: '#f472b6'
-            },
             D: {
                 name: 'D',
-                fullName: 'D Major',
+                fullName: 'Ré maior',
                 notes: ['D3', 'A3', 'D4', 'F#4'],
                 strings: ['X', 'X', '0', '2', '3', '2'],
                 fingers: [
@@ -147,30 +134,29 @@
             }
         };
 
-        // Padrão de batida: ↓ . ↓ ↑ . ↑ ↓ ↑
+        // Batida simples para iniciantes: quatro batidas para baixo
         const STRUM_PATTERN = [
             { dir: '↓', active: true, accent: true },
             { dir: '·', active: false, accent: false },
             { dir: '↓', active: true, accent: false },
-            { dir: '↑', active: true, accent: false },
             { dir: '·', active: false, accent: false },
-            { dir: '↑', active: true, accent: false },
-            { dir: '↓', active: true, accent: true },
-            { dir: '↑', active: true, accent: false }
+            { dir: '↓', active: true, accent: false },
+            { dir: '·', active: false, accent: false },
+            { dir: '↓', active: true, accent: false },
+            { dir: '·', active: false, accent: false }
         ];
 
         // Linha do tempo de 32 segundos
         const TIMELINE = [
-            { start: 0, end: 3.5, type: 'intro', title: 'Fade Into You', subtitle: 'Mazzy Star • Quick Guitar Tutorial', tip: 'Standard Tuning (E A D G B E) • ~78 BPM' },
-            { start: 3.5, end: 7.0, type: 'chord', chordKey: 'A', step: 'Chord 1 of 4', tip: 'Fingers 1, 2 & 3 together on the 2nd fret' },
-            { start: 7.0, end: 10.5, type: 'chord', chordKey: 'E', step: 'Chord 2 of 4', tip: 'Move shape up and strum all 6 strings' },
-            { start: 10.5, end: 14.5, type: 'chord', chordKey: 'Bm', step: 'Chord 3 of 4', tip: 'Barre the 2nd fret + Am chord shape' },
-            { start: 14.5, end: 18.0, type: 'chord', chordKey: 'D', step: 'Chord 4 of 4', tip: 'Strum only from the 4th to 1st string' },
-            { start: 18.0, end: 21.0, type: 'playthrough', chordKey: 'A', label: 'A (1x)' },
-            { start: 21.0, end: 24.0, type: 'playthrough', chordKey: 'E', label: 'E (1x)' },
-            { start: 24.0, end: 27.0, type: 'playthrough', chordKey: 'Bm', label: 'Bm (1x)' },
-            { start: 27.0, end: 30.0, type: 'playthrough', chordKey: 'D', label: 'D (1x)' },
-            { start: 30.0, end: 32.0, type: 'outro', title: 'A  →  E  →  Bm  →  D', subtitle: 'Repeat this progression for the whole song!' }
+            { start: 0, end: 4, type: 'intro', title: 'Three Little Birds', subtitle: 'Bob Marley • Tutorial fácil de violão', tip: 'Afinação padrão (E A D G B E) • batidas para baixo' },
+            { start: 4, end: 8, type: 'chord', chordKey: 'A', step: 'Acorde 1 de 3', tip: 'Use os dedos 1, 2 e 3 na 2ª casa' },
+            { start: 8, end: 12, type: 'chord', chordKey: 'D', step: 'Acorde 2 de 3', tip: 'Toque apenas as 4 cordas mais finas' },
+            { start: 12, end: 16, type: 'chord', chordKey: 'E', step: 'Acorde 3 de 3', tip: 'Toque todas as 6 cordas' },
+            { start: 16, end: 19, type: 'playthrough', chordKey: 'A', label: 'A (1x)' },
+            { start: 19, end: 22, type: 'playthrough', chordKey: 'D', label: 'D (1x)' },
+            { start: 22, end: 25, type: 'playthrough', chordKey: 'A', label: 'A (1x)' },
+            { start: 25, end: 28, type: 'playthrough', chordKey: 'E', label: 'E (1x)' },
+            { start: 28, end: 32, type: 'outro', title: 'A  →  D  →  A  →  E', subtitle: 'Repita a sequência e pratique devagar!' }
         ];
 
         // Referências de DOM e Canvas
@@ -245,7 +231,7 @@
             if (isRendering) return;
 
             if (typeof VideoEncoder === 'undefined' || typeof Mp4Muxer === 'undefined') {
-                downloadText.textContent = 'Use Chrome/Edge';
+                downloadText.textContent = 'Use Chrome ou Edge';
                 return;
             }
 
@@ -254,8 +240,8 @@
             updateButtonUI();
 
             recordingBadge.classList.remove('hidden');
-            renderStatusText.textContent = 'Generating Audio...';
-            downloadText.textContent = 'Rendering...';
+            renderStatusText.textContent = 'Gerando áudio...';
+            downloadText.textContent = 'Gerando...';
             downloadBtn.classList.add('opacity-60', 'cursor-not-allowed');
             playPauseBtn.classList.add('opacity-50', 'pointer-events-none');
             restartBtn.classList.add('opacity-50', 'pointer-events-none');
@@ -439,13 +425,13 @@
 
                     if (frame % 15 === 0) {
                         const pct = Math.round((frame / totalFrames) * 100);
-                        renderStatusText.textContent = `Rendering 720p: ${pct}%`;
+                        renderStatusText.textContent = `Gerando vídeo 720p: ${pct}%`;
                         progressBar.style.width = `${pct}%`;
                         await new Promise(r => setTimeout(r, 0));
                     }
                 }
 
-                renderStatusText.textContent = 'Finalizing MP4...';
+                renderStatusText.textContent = 'Finalizando vídeo...';
                 await videoEncoder.flush();
                 videoEncoder.close();
                 audioEncoder.close();
@@ -456,7 +442,7 @@
                 const a = document.createElement('a');
                 a.style.display = 'none';
                 a.href = url;
-                a.download = 'fade-into-you-720p.mp4';
+                a.download = 'three-little-birds-tutorial-720p.mp4';
                 document.body.appendChild(a);
                 a.click();
                 setTimeout(() => {
@@ -467,12 +453,12 @@
                 progressBar.style.width = `${(elapsedTime / totalDuration) * 100}%`;
             } catch (err) {
                 console.error('Export error:', err);
-                downloadText.textContent = 'Export Error';
-                setTimeout(() => { downloadText.textContent = 'Download Video'; }, 2500);
+                downloadText.textContent = 'Erro ao exportar';
+                setTimeout(() => { downloadText.textContent = 'Baixar vídeo'; }, 2500);
             } finally {
                 isRendering = false;
                 recordingBadge.classList.add('hidden');
-                downloadText.textContent = 'Download Video';
+                downloadText.textContent = 'Baixar vídeo';
                 downloadBtn.classList.remove('opacity-60', 'cursor-not-allowed');
                 playPauseBtn.classList.remove('opacity-50', 'pointer-events-none');
                 restartBtn.classList.remove('opacity-50', 'pointer-events-none');
@@ -482,10 +468,10 @@
         function updateButtonUI() {
             if (isPlaying) {
                 playIcon.textContent = '⏸';
-                playText.textContent = 'Pause';
+                playText.textContent = 'Pausar';
             } else {
                 playIcon.textContent = '▶';
-                playText.textContent = elapsedTime > 0 && elapsedTime < totalDuration ? 'Resume' : 'Play';
+                playText.textContent = elapsedTime > 0 && elapsedTime < totalDuration ? 'Continuar' : 'Tocar';
             }
         }
 
@@ -579,11 +565,11 @@
             targetCtx.textAlign = 'center';
             targetCtx.fillStyle = 'rgba(255,255,255,0.55)';
             targetCtx.font = '600 11px Inter, sans-serif';
-            targetCtx.fillText('HOW TO PLAY • MAZZY STAR', w / 2, 34);
+            targetCtx.fillText('APRENDA A TOCAR • BOB MARLEY', w / 2, 34);
 
             targetCtx.fillStyle = '#f3e8ff';
             targetCtx.font = 'italic 600 26px "Playfair Display", Georgia, serif';
-            targetCtx.fillText('“Fade Into You”', w / 2, 62);
+            targetCtx.fillText('“Three Little Birds”', w / 2, 62);
 
             const contentCenterY = isExportMode ? h * 0.50 : h * 0.46;
 
@@ -595,7 +581,7 @@
                 drawOutro(targetCtx, w, h, seg);
             }
 
-            // Linha do Tempo de Progressão (A - E - Bm - D)
+            // Linha do tempo da sequência de acordes
             if (seg.type !== 'intro') {
                 drawProgressionBar(targetCtx, w, h, seg, isExportMode);
             }
@@ -617,11 +603,11 @@
 
             targetCtx.fillStyle = '#e9d5ff';
             targetCtx.font = '800 18px Inter, sans-serif';
-            targetCtx.fillText('ONLY 4 CHORDS', 0, -24);
+            targetCtx.fillText('SÓ 3 ACORDES FÁCEIS', 0, -24);
 
             targetCtx.fillStyle = '#c084fc';
             targetCtx.font = '800 25px Inter, sans-serif';
-            targetCtx.fillText('A  •  E  •  Bm  •  D', 0, 14);
+            targetCtx.fillText('A  •  D  •  E', 0, 14);
 
             targetCtx.fillStyle = '#a1a1aa';
             targetCtx.font = '500 11px Inter, sans-serif';
@@ -641,7 +627,7 @@
 
             targetCtx.fillStyle = '#d4d4d8';
             targetCtx.font = '600 11px Inter, sans-serif';
-            targetCtx.fillText(seg.type === 'playthrough' ? 'FULL PLAYTHROUGH' : seg.step.toUpperCase(), w / 2, topY + 16);
+            targetCtx.fillText(seg.type === 'playthrough' ? 'TOQUE JUNTO' : seg.step.toUpperCase(), w / 2, topY + 16);
 
             // Nome do Acorde
             targetCtx.fillStyle = chord.color;
@@ -724,7 +710,7 @@
                 }
             }
 
-            // Pestana (Barre) no Bm
+            // Pestana, caso o acorde use uma.
             if (chord.barre) {
                 const y = startY + (chord.barre.fret - 0.5) * fretSpacing;
                 const x1 = leftX + (6 - chord.barre.fromString) * stringSpacing;
@@ -776,7 +762,7 @@
         }
 
         function drawProgressionBar(targetCtx, w, h, seg, isExportMode) {
-            const chordsOrder = ['A', 'E', 'Bm', 'D'];
+            const chordsOrder = ['A', 'D', 'E'];
             const barY = isExportMode ? h - 55 : h - 88;
             const pillW = 46;
             const gap = 8;
