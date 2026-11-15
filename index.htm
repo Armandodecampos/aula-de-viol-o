@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tutorial: Three Little Birds - Bob Marley</title>
+    <title>Tutorial: Seven Nation Army - The White Stripes</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/mp4-muxer@5.1.3/build/mp4-muxer.min.js"></script>
@@ -19,16 +19,17 @@
             font-family: 'Playfair Display', serif;
             font-style: italic;
         }
-        /* Proporção vertical 9:16 */
+        /* Proporção vertical 9:16 com fallback explícito de altura */
         .tiktok-container {
             aspect-ratio: 9 / 16;
+            height: 85vh;
             max-height: 85vh;
             width: auto;
             max-width: 100%;
         }
     </style>
 </head>
-<body class="min-h-screen flex flex-col items-center justify-center p-4 bg-gradient-to-br from-zinc-950 via-purple-950/20 to-zinc-950">
+<body class="min-h-screen flex flex-col items-center justify-center p-4 bg-gradient-to-br from-zinc-950 via-red-950/30 to-zinc-950">
 
     <!-- Container do Vídeo Vertical -->
     <div class="tiktok-container relative bg-zinc-900 rounded-3xl shadow-2xl border border-zinc-800 overflow-hidden flex flex-col justify-between">
@@ -38,26 +39,26 @@
 
         <!-- Barra de Progresso Discreta no Topo -->
         <div class="absolute top-0 left-0 right-0 h-1 bg-zinc-800/60">
-            <div id="progressBar" class="bg-purple-400 h-full w-0 transition-all duration-100"></div>
+            <div id="progressBar" class="bg-red-500 h-full w-0 transition-all duration-100"></div>
         </div>
 
         <!-- Indicador de Renderização (visível apenas ao exportar vídeo) -->
-        <div id="recordingBadge" class="hidden absolute top-3 right-3 bg-purple-600/95 backdrop-blur text-white text-[11px] font-bold px-3 py-1 rounded-full flex items-center gap-1.5 shadow-lg">
+        <div id="recordingBadge" class="hidden absolute top-3 right-3 bg-red-600/95 backdrop-blur text-white text-[11px] font-bold px-3 py-1 rounded-full flex items-center gap-1.5 shadow-lg">
             <span class="w-2 h-2 rounded-full bg-white animate-pulse"></span>
-            <span id="renderStatusText">Gerando vídeo 720p...</span>
+            <span id="renderStatusText">Rendering 720p...</span>
         </div>
 
         <!-- Controles na Base -->
         <div class="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/90 via-black/50 to-transparent flex items-center justify-between gap-2">
-            <button id="playPauseBtn" class="flex-1 bg-purple-600 hover:bg-purple-500 active:scale-95 transition text-white font-semibold py-2.5 px-3 rounded-xl text-xs flex items-center justify-center gap-1.5 shadow-lg shadow-purple-900/40 cursor-pointer">
+            <button id="playPauseBtn" class="flex-1 bg-red-600 hover:bg-red-500 active:scale-95 transition text-white font-semibold py-2.5 px-3 rounded-xl text-xs flex items-center justify-center gap-1.5 shadow-lg shadow-red-900/40 cursor-pointer">
                 <span id="playIcon">▶</span>
-                <span id="playText">Tocar</span>
+                <span id="playText">Play</span>
             </button>
-            <button id="downloadBtn" class="bg-emerald-600 hover:bg-emerald-500 active:scale-95 transition text-white font-semibold py-2.5 px-3 rounded-xl text-xs flex items-center justify-center gap-1.5 shadow-lg shadow-emerald-900/40 cursor-pointer" title="Gerar e baixar vídeo">
+            <button id="downloadBtn" class="bg-emerald-600 hover:bg-emerald-500 active:scale-95 transition text-white font-semibold py-2.5 px-3 rounded-xl text-xs flex items-center justify-center gap-1.5 shadow-lg shadow-emerald-900/40 cursor-pointer" title="Render and Download Video">
                 <span>⬇</span>
-                <span id="downloadText">Baixar vídeo</span>
+                <span id="downloadText">Download Video</span>
             </button>
-            <button id="restartBtn" class="bg-zinc-800 hover:bg-zinc-700 active:scale-95 transition text-zinc-200 p-2.5 rounded-xl text-xs cursor-pointer" title="Reiniciar">
+            <button id="restartBtn" class="bg-zinc-800 hover:bg-zinc-700 active:scale-95 transition text-zinc-200 p-2.5 rounded-xl text-xs cursor-pointer" title="Restart">
                 ↺
             </button>
         </div>
@@ -66,97 +67,173 @@
     <script>
         /**
          * CONFIGURAÇÃO DE ÁUDIO (Tone.js)
-         * Sintetiza um timbre suave de violão.
+         * Cadeia de amplificador realista (Cab Sim + Warm Overdrive + Sub-Octave).
          */
         let synth = null;
         let audioInitialized = false;
 
+        function createGuitarRig(destination, context = Tone.getContext()) {
+            const cabSim = new Tone.Filter({
+                context,
+                type: "lowpass",
+                frequency: 1150,
+                rolloff: -24,
+                Q: 1.8
+            }).connect(destination);
+
+            const bodyEQ = new Tone.EQ3({
+                context,
+                low: 4,
+                mid: 2,
+                high: -8,
+                lowFrequency: 220,
+                highFrequency: 1800
+            }).connect(cabSim);
+
+            const drive = new Tone.Distortion({
+                context,
+                distortion: 0.22,
+                oversample: "4x"
+            }).connect(bodyEQ);
+
+            const roomAmbience = new Tone.FeedbackDelay({
+                context,
+                delayTime: 0.045,
+                feedback: 0.18,
+                wet: 0.16
+            }).connect(drive);
+
+            return new Tone.PolySynth({
+                context,
+                voice: Tone.MonoSynth,
+                options: {
+                    oscillator: {
+                        type: "fatsawtooth",
+                        count: 2,
+                        spread: 8
+                    },
+                    filter: {
+                        Q: 2.2,
+                        type: "lowpass",
+                        rolloff: -24
+                    },
+                    envelope: {
+                        attack: 0.012,
+                        decay: 0.35,
+                        sustain: 0.45,
+                        release: 0.35
+                    },
+                    filterEnvelope: {
+                        attack: 0.01,
+                        decay: 0.28,
+                        sustain: 0.25,
+                        release: 0.3,
+                        baseFrequency: 180,
+                        octaves: 2.6,
+                        exponent: 2
+                    },
+                    volume: -6
+                }
+            }).connect(roomAmbience);
+        }
+
         async function initAudio() {
             if (audioInitialized) return;
             await Tone.start();
-            
-            const reverb = new Tone.Reverb({ decay: 3.5, wet: 0.4 }).toDestination();
-            
-            synth = new Tone.PolySynth(Tone.Synth, {
-                oscillator: { type: "triangle" },
-                envelope: {
-                    attack: 0.03,
-                    decay: 0.8,
-                    sustain: 0.2,
-                    release: 1.8
-                },
-                volume: -6
-            }).connect(reverb);
-
+            synth = createGuitarRig(Tone.getDestination(), Tone.getContext());
             audioInitialized = true;
         }
-
-        // Acordes abertos de "Three Little Birds" (A, D e E)
-        const CHORDS = {
-            A: {
-                name: 'A',
-                fullName: 'Lá maior',
-                notes: ['A2', 'E3', 'A3', 'C#4', 'E4'],
-                strings: ['X', '0', '2', '2', '2', '0'],
+            
+        // Definição das posições do riff principal na 5ª corda (A string): 7 - 7 - 10 - 7 - 5 - 3 - 2
+        const RIFF_NOTES = {
+            E_7: {
+                name: '7',
+                fullName: 'E Note (5th String, 7th Fret)',
+                notes: ['E2', 'E3'],
+                fretOffset: 2,
+                strings: ['X', '7', 'X', 'X', 'X', 'X'],
                 fingers: [
-                    { string: 4, fret: 2, finger: '1' },
-                    { string: 3, fret: 2, finger: '2' },
-                    { string: 2, fret: 2, finger: '3' }
+                    { string: 5, fret: 7, finger: '1' }
                 ],
-                barre: null,
-                color: '#c084fc'
+                color: '#ef4444'
             },
-            E: {
-                name: 'E',
-                fullName: 'Mi maior',
-                notes: ['E2', 'B2', 'E3', 'G#3', 'B3', 'E4'],
-                strings: ['0', '2', '2', '1', '0', '0'],
+            G_10: {
+                name: '10',
+                fullName: 'G Note (5th String, 10th Fret)',
+                notes: ['G2', 'G3'],
+                fretOffset: 2,
+                strings: ['X', '10', 'X', 'X', 'X', 'X'],
                 fingers: [
-                    { string: 3, fret: 1, finger: '1' },
-                    { string: 5, fret: 2, finger: '2' },
-                    { string: 4, fret: 2, finger: '3' }
+                    { string: 5, fret: 10, finger: '4' }
                 ],
-                barre: null,
-                color: '#818cf8'
+                color: '#f87171'
             },
-            D: {
-                name: 'D',
-                fullName: 'Ré maior',
-                notes: ['D3', 'A3', 'D4', 'F#4'],
-                strings: ['X', 'X', '0', '2', '3', '2'],
+            D_5: {
+                name: '5',
+                fullName: 'D Note (5th String, 5th Fret)',
+                notes: ['D2', 'D3'],
+                fretOffset: 2,
+                strings: ['X', '5', 'X', 'X', 'X', 'X'],
                 fingers: [
-                    { string: 3, fret: 2, finger: '1' },
-                    { string: 1, fret: 2, finger: '2' },
-                    { string: 2, fret: 3, finger: '3' }
+                    { string: 5, fret: 5, finger: '1' }
                 ],
-                barre: null,
-                color: '#38bdf8'
+                color: '#fb923c'
+            },
+            C_3: {
+                name: '3',
+                fullName: 'C Note (5th String, 3rd Fret)',
+                notes: ['C2', 'C3'],
+                fretOffset: 2,
+                strings: ['X', '3', 'X', 'X', 'X', 'X'],
+                fingers: [
+                    { string: 5, fret: 3, finger: '2' }
+                ],
+                color: '#facc15'
+            },
+            B_2: {
+                name: '2',
+                fullName: 'B Note (5th String, 2nd Fret)',
+                notes: ['B1', 'B2'],
+                fretOffset: 2,
+                strings: ['X', '2', 'X', 'X', 'X', 'X'],
+                fingers: [
+                    { string: 5, fret: 2, finger: '1' }
+                ],
+                color: '#ffffff'
             }
         };
 
-        // Batida simples para iniciantes: quatro batidas para baixo
-        const STRUM_PATTERN = [
-            { dir: '↓', active: true, accent: true },
-            { dir: '·', active: false, accent: false },
-            { dir: '↓', active: true, accent: false },
-            { dir: '·', active: false, accent: false },
-            { dir: '↓', active: true, accent: false },
-            { dir: '·', active: false, accent: false },
-            { dir: '↓', active: true, accent: false },
-            { dir: '·', active: false, accent: false }
+        // Tempos exatos do riff em 2 compassos (4/4 a ~124 BPM)
+        const RIFF_EVENTS = [
+            { at: 0.000, noteKey: 'E_7', label: '7', dur: 0.62 },
+            { at: 0.1875, noteKey: 'E_7', label: '7', dur: 0.22 },
+            { at: 0.250, noteKey: 'G_10', label: '10', dur: 0.28 },
+            { at: 0.333, noteKey: 'E_7', label: '7', dur: 0.28 },
+            { at: 0.416, noteKey: 'D_5', label: '5', dur: 0.28 },
+            { at: 0.500, noteKey: 'C_3', label: '3', dur: 0.88 },
+            { at: 0.750, noteKey: 'B_2', label: '2', dur: 0.88 }
+        ];
+
+        // Padrão de demonstração para cada casa isolada
+        const NOTE_DEMO_EVENTS = [
+            { at: 0.00, dur: 0.50 },
+            { at: 0.1875, dur: 0.28 },
+            { at: 0.50, dur: 0.50 },
+            { at: 0.6875, dur: 0.28 }
         ];
 
         // Linha do tempo de 32 segundos
         const TIMELINE = [
-            { start: 0, end: 4, type: 'intro', title: 'Three Little Birds', subtitle: 'Bob Marley • Tutorial fácil de violão', tip: 'Afinação padrão (E A D G B E) • batidas para baixo' },
-            { start: 4, end: 8, type: 'chord', chordKey: 'A', step: 'Acorde 1 de 3', tip: 'Use os dedos 1, 2 e 3 na 2ª casa' },
-            { start: 8, end: 12, type: 'chord', chordKey: 'D', step: 'Acorde 2 de 3', tip: 'Toque apenas as 4 cordas mais finas' },
-            { start: 12, end: 16, type: 'chord', chordKey: 'E', step: 'Acorde 3 de 3', tip: 'Toque todas as 6 cordas' },
-            { start: 16, end: 19, type: 'playthrough', chordKey: 'A', label: 'A (1x)' },
-            { start: 19, end: 22, type: 'playthrough', chordKey: 'D', label: 'D (1x)' },
-            { start: 22, end: 25, type: 'playthrough', chordKey: 'A', label: 'A (1x)' },
-            { start: 25, end: 28, type: 'playthrough', chordKey: 'E', label: 'E (1x)' },
-            { start: 28, end: 32, type: 'outro', title: 'A  →  D  →  A  →  E', subtitle: 'Repita a sequência e pratique devagar!' }
+            { start: 0, end: 3.5, type: 'intro', title: 'Seven Nation Army', subtitle: 'The White Stripes • Iconic Riff Tutorial', tip: 'All played on the 5th String (A String) • 124 BPM' },
+            { start: 3.5, end: 6.5, type: 'note', noteKey: 'E_7', step: 'Note 1 • Fret 7', tip: 'Double hit on Fret 7: long first note, quick second' },
+            { start: 6.5, end: 9.5, type: 'note', noteKey: 'G_10', step: 'Note 2 • Fret 10', tip: 'Reach up to the 10th fret, then step back to 7' },
+            { start: 9.5, end: 12.5, type: 'note', noteKey: 'D_5', step: 'Note 3 • Fret 5', tip: 'Slide down cleanly to the 5th fret' },
+            { start: 12.5, end: 15.5, type: 'note', noteKey: 'C_3', step: 'Note 4 • Fret 3', tip: 'Hold the 3rd fret for two full beats' },
+            { start: 15.5, end: 18.0, type: 'note', noteKey: 'B_2', step: 'Note 5 • Fret 2', tip: 'Resolve on the 2nd fret for two full beats' },
+            { start: 18.0, end: 21.87, type: 'playthrough', loopNum: 'Riff Loop 1', tip: '7 (hold) - 7 - 10 - 7 - 5 - 3 (hold) - 2 (hold)' },
+            { start: 21.87, end: 25.74, type: 'playthrough', loopNum: 'Riff Loop 2', tip: '7 (hold) - 7 - 10 - 7 - 5 - 3 (hold) - 2 (hold)' },
+            { start: 25.74, end: 29.61, type: 'playthrough', loopNum: 'Riff Loop 3', tip: 'Feel the triplet swing on 10 - 7 - 5!' },
+            { start: 29.61, end: 32.0, type: 'outro', title: '7 - 7 - 10 - 7 - 5 - 3 - 2', subtitle: 'Play on the 5th (A) string • Turn up the fuzz!' }
         ];
 
         // Referências de DOM e Canvas
@@ -179,629 +256,284 @@
         let lastTimestamp = null;
         let lastTriggeredStep = -1;
         let strumVisualPulse = 0;
-        let activeStrumIndex = -1;
+        let activeNoteKey = 'E_7';
+        let activeSeqIndex = -1;
 
         function resizeCanvas() {
             const rect = canvas.parentElement.getBoundingClientRect();
             const dpr = window.devicePixelRatio || 1;
-            canvas.width = rect.width * dpr;
-            canvas.height = rect.height * dpr;
+            const w = rect.width || 360;
+            const h = rect.height || 640;
+            canvas.width = w * dpr;
+            canvas.height = h * dpr;
             ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
             renderFrame();
         }
         window.addEventListener('resize', resizeCanvas);
 
-        function strumChord(notes, direction, targetSynth = synth, startTime = Tone.now()) {
-            if (!targetSynth) return;
-            const orderedNotes = direction === '↑' ? [...notes].reverse() : notes;
-            orderedNotes.forEach((note, idx) => {
-                targetSynth.triggerAttackRelease(note, '2n', startTime + idx * 0.025);
-            });
-        }
-
-        // Controles de Reprodução
-        playPauseBtn.addEventListener('click', async () => {
-            if (isRendering) return;
-            await initAudio();
-            if (elapsedTime >= totalDuration) {
-                elapsedTime = 0;
-                lastTriggeredStep = -1;
-            }
-            isPlaying = !isPlaying;
-            updateButtonUI();
-            if (isPlaying) {
-                lastTimestamp = performance.now();
-                requestAnimationFrame(loop);
-            }
-        });
-
-        restartBtn.addEventListener('click', async () => {
-            if (isRendering) return;
-            await initAudio();
-            elapsedTime = 0;
-            lastTriggeredStep = -1;
-            isPlaying = true;
-            updateButtonUI();
-            lastTimestamp = performance.now();
-            requestAnimationFrame(loop);
-        });
-
-        // Renderização Offline 720x1280 @ 30fps (Rápida e Sem Travamentos)
-        downloadBtn.addEventListener('click', async () => {
-            if (isRendering) return;
-
-            if (typeof VideoEncoder === 'undefined' || typeof Mp4Muxer === 'undefined') {
-                downloadText.textContent = 'Use Chrome ou Edge';
-                return;
-            }
-
-            isRendering = true;
-            isPlaying = false;
-            updateButtonUI();
-
-            recordingBadge.classList.remove('hidden');
-            renderStatusText.textContent = 'Gerando áudio...';
-            downloadText.textContent = 'Gerando...';
-            downloadBtn.classList.add('opacity-60', 'cursor-not-allowed');
-            playPauseBtn.classList.add('opacity-50', 'pointer-events-none');
-            restartBtn.classList.add('opacity-50', 'pointer-events-none');
-
-            try {
-                const width = 720;
-                const height = 1280;
-                const fps = 30;
-                const sampleRate = 44100;
-                const totalFrames = totalDuration * fps;
-
-                // 1. Renderiza o áudio completo offline em alta fidelidade
-                const audioBuffer = await Tone.Offline(({ transport }) => {
-                    const offReverb = new Tone.Reverb({ decay: 3.5, wet: 0.4 }).toDestination();
-                    const offSynth = new Tone.PolySynth(Tone.Synth, {
-                        oscillator: { type: "triangle" },
-                        envelope: { attack: 0.03, decay: 0.8, sustain: 0.2, release: 1.8 },
-                        volume: -6
-                    }).connect(offReverb);
-
-                    TIMELINE.forEach((seg) => {
-                        if (seg.type === 'chord' || seg.type === 'playthrough') {
-                            const chord = CHORDS[seg.chordKey];
-                            const segDuration = seg.end - seg.start;
-                            for (let stepIndex = 0; stepIndex < 8; stepIndex++) {
-                                const strum = STRUM_PATTERN[stepIndex];
-                                if (strum && strum.active) {
-                                    const stepTime = seg.start + (stepIndex / 8) * segDuration;
-                                    const orderedNotes = strum.dir === '↑' ? [...chord.notes].reverse() : chord.notes;
-                                    orderedNotes.forEach((note, idx) => {
-                                        offSynth.triggerAttackRelease(note, '2n', stepTime + idx * 0.025);
-                                    });
-                                }
-                            }
-                        }
-                    });
-                    transport.start();
-                }, totalDuration);
-
-                // 2. Configura o Muxer MP4
-                const muxer = new Mp4Muxer.Muxer({
-                    target: new Mp4Muxer.ArrayBufferTarget(),
-                    video: {
-                        codec: 'avc',
-                        width,
-                        height
-                    },
-                    audio: {
-                        codec: 'aac',
-                        sampleRate,
-                        numberOfChannels: 2
-                    },
-                    fastStart: 'in-memory'
-                });
-
-                // 3. Codifica o Áudio AAC
-                const audioEncoder = new AudioEncoder({
-                    output: (chunk, meta) => muxer.addAudioChunk(chunk, meta),
-                    error: (e) => console.error(e)
-                });
-                audioEncoder.configure({
-                    codec: 'mp4a.40.2',
-                    numberOfChannels: 2,
-                    sampleRate,
-                    bitrate: 128000
-                });
-
-                const leftChannel = audioBuffer.getChannelData(0);
-                const rightChannel = audioBuffer.numberOfChannels > 1 ? audioBuffer.getChannelData(1) : leftChannel;
-                const chunkSize = 1024;
-                for (let offset = 0; offset < leftChannel.length; offset += chunkSize) {
-                    const frames = Math.min(chunkSize, leftChannel.length - offset);
-                    const planar = new Float32Array(frames * 2);
-                    planar.set(leftChannel.subarray(offset, offset + frames), 0);
-                    planar.set(rightChannel.subarray(offset, offset + frames), frames);
-
-                    const audioData = new AudioData({
-                        format: 'f32-planar',
-                        sampleRate,
-                        numberOfFrames: frames,
-                        numberOfChannels: 2,
-                        timestamp: Math.round((offset / sampleRate) * 1_000_000),
-                        data: planar
-                    });
-                    audioEncoder.encode(audioData);
-                    audioData.close();
-                }
-                await audioEncoder.flush();
-
-                // 4. Codifica o Vídeo Frame a Frame em 720x1280 @ 30fps
-                const candidateConfigs = [
-                    { codec: 'avc1.42001f', hardwareAcceleration: 'no-preference' },
-                    { codec: 'avc1.4d001f', hardwareAcceleration: 'no-preference' },
-                    { codec: 'avc1.42E01E', hardwareAcceleration: 'no-preference' },
-                    { codec: 'avc1.4d002a', hardwareAcceleration: 'no-preference' }
-                ];
-
-                let selectedVideoConfig = null;
-                for (const candidate of candidateConfigs) {
-                    const testConfig = {
-                        codec: candidate.codec,
-                        width,
-                        height,
-                        bitrate: 3_500_000,
-                        framerate: fps,
-                        hardwareAcceleration: candidate.hardwareAcceleration
-                    };
-                    const support = await VideoEncoder.isConfigSupported(testConfig);
-                    if (support.supported) {
-                        selectedVideoConfig = support.config;
-                        break;
-                    }
-                }
-
-                if (!selectedVideoConfig) {
-                    throw new Error('H.264 VideoEncoder is not supported on this browser/device.');
-                }
-
-                let encoderError = null;
-                const videoEncoder = new VideoEncoder({
-                    output: (chunk, meta) => muxer.addVideoChunk(chunk, meta),
-                    error: (e) => {
-                        encoderError = e;
-                        console.error('VideoEncoder error:', e);
-                    }
-                });
-                videoEncoder.configure(selectedVideoConfig);
-
-                const offCanvas = document.createElement('canvas');
-                offCanvas.width = width;
-                offCanvas.height = height;
-                const offCtx = offCanvas.getContext('2d', { alpha: false });
-                const logicalW = 360;
-                const logicalH = 640;
-                offCtx.scale(2, 2);
-
-                let offPulse = 0;
-                let offLastStep = -1;
-                let offActiveStrum = -1;
-
-                for (let frame = 0; frame < totalFrames; frame++) {
-                    if (encoderError || videoEncoder.state === 'closed') {
-                        throw encoderError || new Error('VideoEncoder closed unexpectedly.');
-                    }
-
-                    // Aguarda a fila esvaziar se houver muitos quadros pendentes
-                    while (videoEncoder.encodeQueueSize > 10) {
-                        await new Promise(r => setTimeout(r, 5));
-                    }
-
-                    const t = frame / fps;
-                    const dt = 1 / fps;
-
-                    if (offPulse > 0) offPulse = Math.max(0, offPulse - dt * 4);
-
-                    const seg = TIMELINE.find(s => t >= s.start && t < s.end);
-                    if (seg && (seg.type === 'chord' || seg.type === 'playthrough')) {
-                        const segDuration = seg.end - seg.start;
-                        const segProgress = (t - seg.start) / segDuration;
-                        const stepIndex = Math.floor(segProgress * 8);
-                        const globalStepId = TIMELINE.indexOf(seg) * 10 + stepIndex;
-
-                        if (globalStepId !== offLastStep && stepIndex < 8) {
-                            offLastStep = globalStepId;
-                            offActiveStrum = stepIndex;
-                            const strum = STRUM_PATTERN[stepIndex];
-                            if (strum && strum.active) offPulse = 1.0;
-                        }
-                    } else {
-                        offActiveStrum = -1;
-                    }
-
-                    renderScene(offCtx, logicalW, logicalH, t, offPulse, offActiveStrum, true);
-
-                    const videoFrame = new VideoFrame(offCanvas, {
-                        timestamp: Math.round(t * 1_000_000),
-                        duration: Math.round(dt * 1_000_000)
-                    });
-                    videoEncoder.encode(videoFrame, { keyFrame: frame % (fps * 2) === 0 });
-                    videoFrame.close();
-
-                    if (frame % 15 === 0) {
-                        const pct = Math.round((frame / totalFrames) * 100);
-                        renderStatusText.textContent = `Gerando vídeo 720p: ${pct}%`;
-                        progressBar.style.width = `${pct}%`;
-                        await new Promise(r => setTimeout(r, 0));
-                    }
-                }
-
-                renderStatusText.textContent = 'Finalizando vídeo...';
-                await videoEncoder.flush();
-                videoEncoder.close();
-                audioEncoder.close();
-                muxer.finalize();
-
-                const blob = new Blob([muxer.target.buffer], { type: 'video/mp4' });
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.style.display = 'none';
-                a.href = url;
-                a.download = 'three-little-birds-tutorial-720p.mp4';
-                document.body.appendChild(a);
-                a.click();
-                setTimeout(() => {
-                    document.body.removeChild(a);
-                    URL.revokeObjectURL(url);
-                }, 200);
-
-                progressBar.style.width = `${(elapsedTime / totalDuration) * 100}%`;
-            } catch (err) {
-                console.error('Export error:', err);
-                downloadText.textContent = 'Erro ao exportar';
-                setTimeout(() => { downloadText.textContent = 'Baixar vídeo'; }, 2500);
-            } finally {
-                isRendering = false;
-                recordingBadge.classList.add('hidden');
-                downloadText.textContent = 'Baixar vídeo';
-                downloadBtn.classList.remove('opacity-60', 'cursor-not-allowed');
-                playPauseBtn.classList.remove('opacity-50', 'pointer-events-none');
-                restartBtn.classList.remove('opacity-50', 'pointer-events-none');
-            }
-        });
-
-        function updateButtonUI() {
-            if (isPlaying) {
-                playIcon.textContent = '⏸';
-                playText.textContent = 'Pausar';
-            } else {
-                playIcon.textContent = '▶';
-                playText.textContent = elapsedTime > 0 && elapsedTime < totalDuration ? 'Continuar' : 'Tocar';
+        function playRiffNote(noteKey, duration = 0.4, time = undefined) {
+            if (!synth) return;
+            const noteData = RIFF_NOTES[noteKey];
+            if (!noteData) return;
+            const triggerTime = time !== undefined ? time : Tone.now();
+            synth.triggerAttackRelease(noteData.notes, duration, triggerTime, 0.9);
+            if (time === undefined) {
+                strumVisualPulse = 1.0;
             }
         }
 
-        // Loop Principal de Animação em Tempo Real
-        function loop(timestamp) {
-            if (!isPlaying) return;
-
-            const dt = (timestamp - lastTimestamp) / 1000;
-            lastTimestamp = timestamp;
-            elapsedTime += dt;
-
-            if (strumVisualPulse > 0) {
-                strumVisualPulse = Math.max(0, strumVisualPulse - dt * 4);
-            }
-
-            if (elapsedTime >= totalDuration) {
-                elapsedTime = totalDuration;
-                isPlaying = false;
-                activeStrumIndex = -1;
-                updateButtonUI();
-                renderFrame();
-                return;
-            }
-
-            const currentSeg = TIMELINE.find(s => elapsedTime >= s.start && elapsedTime < s.end);
-            if (currentSeg && (currentSeg.type === 'chord' || currentSeg.type === 'playthrough')) {
-                const segDuration = currentSeg.end - currentSeg.start;
-                const segProgress = (elapsedTime - currentSeg.start) / segDuration;
-                const stepIndex = Math.floor(segProgress * 8);
-                const globalStepId = TIMELINE.indexOf(currentSeg) * 10 + stepIndex;
-
-                if (globalStepId !== lastTriggeredStep && stepIndex < 8) {
-                    lastTriggeredStep = globalStepId;
-                    activeStrumIndex = stepIndex;
-                    const strum = STRUM_PATTERN[stepIndex];
-                    if (strum && strum.active) {
-                        const chord = CHORDS[currentSeg.chordKey];
-                        strumChord(chord.notes, strum.dir);
-                        strumVisualPulse = 1.0;
-                    }
-                }
-            } else {
-                activeStrumIndex = -1;
-            }
-
-            progressBar.style.width = `${(elapsedTime / totalDuration) * 100}%`;
-            renderFrame();
-            requestAnimationFrame(loop);
+        function getCurrentScene(t) {
+            return TIMELINE.find(s => t >= s.start && t < s.end) || TIMELINE[TIMELINE.length - 1];
         }
 
-        // Renderiza o quadro atual no canvas de visualização
-        function renderFrame() {
-            const rect = canvas.parentElement.getBoundingClientRect();
-            const w = rect.width;
-            const h = rect.height;
-            if (w === 0 || h === 0) return;
+        // Renderiza qualquer instante 't' em qualquer contexto (tela ou exportação 720p)
+        function renderScene(targetCtx, w, h, t, pulseVal, currentNoteKey, seqIdx, isExport = false) {
+            const scene = getCurrentScene(t);
 
-            renderScene(ctx, w, h, elapsedTime, strumVisualPulse, activeStrumIndex, false);
-        }
-
-        // Função de Desenho Unificada (usada tanto no preview quanto na exportação 720p)
-        function renderScene(targetCtx, w, h, time, pulse, activeStrum, isExportMode) {
-            // 1. Fundo atmosférico
+            // Fundo estilizado vermelho/preto/branco (The White Stripes)
             const bgGrad = targetCtx.createLinearGradient(0, 0, 0, h);
-            bgGrad.addColorStop(0, '#120c1f');
-            bgGrad.addColorStop(0.5, '#191326');
-            bgGrad.addColorStop(1, '#09090b');
+            bgGrad.addColorStop(0, '#18080a');
+            bgGrad.addColorStop(0.5, '#09090b');
+            bgGrad.addColorStop(1, '#1c0a0d');
             targetCtx.fillStyle = bgGrad;
             targetCtx.fillRect(0, 0, w, h);
 
-            // Brilho ambiente suave
-            const glowGrad = targetCtx.createRadialGradient(w * 0.5, h * 0.42, 10, w * 0.5, h * 0.42, w * 0.8);
-            glowGrad.addColorStop(0, `rgba(168, 85, 247, ${0.14 + pulse * 0.14})`);
-            glowGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
-            targetCtx.fillStyle = glowGrad;
-            targetCtx.fillRect(0, 0, w, h);
+            // Listras geométricas sutis no fundo
+            targetCtx.fillStyle = 'rgba(239, 68, 68, 0.04)';
+            targetCtx.beginPath();
+            targetCtx.moveTo(0, h * 0.25);
+            targetCtx.lineTo(w, h * 0.12);
+            targetCtx.lineTo(w, h * 0.22);
+            targetCtx.lineTo(0, h * 0.35);
+            targetCtx.fill();
 
-            // Partículas flutuantes sutis
-            targetCtx.fillStyle = 'rgba(216, 180, 254, 0.16)';
-            for (let i = 0; i < 14; i++) {
-                const px = ((i * 73 + time * 8) % w);
-                const py = ((i * 137 - time * 14 + h * 10) % h);
-                targetCtx.beginPath();
-                targetCtx.arc(px, py, (i % 3) + 1, 0, Math.PI * 2);
-                targetCtx.fill();
+            // Brilho reativo ao som
+            if (pulseVal > 0.01) {
+                const radGrad = targetCtx.createRadialGradient(w / 2, h * 0.45, 10, w / 2, h * 0.45, w * 0.85);
+                radGrad.addColorStop(0, `rgba(239, 68, 68, ${0.22 * pulseVal})`);
+                radGrad.addColorStop(1, 'rgba(239, 68, 68, 0)');
+                targetCtx.fillStyle = radGrad;
+                targetCtx.fillRect(0, 0, w, h);
             }
 
-            const seg = TIMELINE.find(s => time >= s.start && time < s.end) || TIMELINE[TIMELINE.length - 1];
-
-            // Cabeçalho do Vídeo
+            // Cabeçalho
             targetCtx.textAlign = 'center';
-            targetCtx.fillStyle = 'rgba(255,255,255,0.55)';
-            targetCtx.font = '600 11px Inter, sans-serif';
-            targetCtx.fillText('APRENDA A TOCAR • BOB MARLEY', w / 2, 34);
+            targetCtx.fillStyle = 'rgba(255, 255, 255, 0.92)';
+            targetCtx.font = `600 ${Math.round(w * 0.055)}px "Playfair Display", serif`;
+            targetCtx.fillText('“Seven Nation Army”', w / 2, h * 0.095);
 
-            targetCtx.fillStyle = '#f3e8ff';
-            targetCtx.font = 'italic 600 26px "Playfair Display", Georgia, serif';
-            targetCtx.fillText('“Three Little Birds”', w / 2, 62);
+            targetCtx.fillStyle = '#f87171';
+            targetCtx.font = `700 ${Math.round(w * 0.028)}px Inter, sans-serif`;
+            targetCtx.fillText('THE WHITE STRIPES • RIFF TUTORIAL', w / 2, h * 0.125);
 
-            const contentCenterY = isExportMode ? h * 0.50 : h * 0.46;
+            // CENA INTRO / OUTRO
+            if (scene.type === 'intro' || scene.type === 'outro') {
+                const cardY = h * 0.28;
+                const cardH = h * 0.34;
+                roundRect(targetCtx, w * 0.08, cardY, w * 0.84, cardH, 24, 'rgba(24, 24, 27, 0.88)', 'rgba(239, 68, 68, 0.35)');
 
-            if (seg.type === 'intro') {
-                drawIntro(targetCtx, w, h, seg, time);
-            } else if (seg.type === 'chord' || seg.type === 'playthrough') {
-                drawChordLesson(targetCtx, w, h, contentCenterY, seg, pulse, activeStrum);
-            } else if (seg.type === 'outro') {
-                drawOutro(targetCtx, w, h, seg);
-            }
+                targetCtx.fillStyle = '#ffffff';
+                targetCtx.font = `800 ${Math.round(w * 0.068)}px Inter, sans-serif`;
+                targetCtx.fillText(scene.title, w / 2, cardY + cardH * 0.34);
 
-            // Linha do tempo da sequência de acordes
-            if (seg.type !== 'intro') {
-                drawProgressionBar(targetCtx, w, h, seg, isExportMode);
-            }
-        }
+                targetCtx.fillStyle = '#fca5a5';
+                targetCtx.font = `500 ${Math.round(w * 0.036)}px Inter, sans-serif`;
+                targetCtx.fillText(scene.subtitle, w / 2, cardY + cardH * 0.50);
 
-        function drawIntro(targetCtx, w, h, seg, time) {
-            const centerY = h * 0.48;
-            const scale = 1 + Math.sin(time * 3) * 0.025;
-            targetCtx.save();
-            targetCtx.translate(w / 2, centerY);
-            targetCtx.scale(scale, scale);
+                // Pílulas com a sequência do riff
+                const riffNotes = ['7', '7', '10', '7', '5', '3', '2'];
+                const pillW = (w * 0.72) / riffNotes.length - 4;
+                const startX = (w - ((pillW + 4) * riffNotes.length - 4)) / 2;
 
-            targetCtx.fillStyle = 'rgba(192, 132, 252, 0.14)';
-            targetCtx.strokeStyle = 'rgba(192, 132, 252, 0.45)';
-            targetCtx.lineWidth = 1.5;
-            roundRect(targetCtx, -135, -75, 270, 150, 22);
-            targetCtx.fill();
-            targetCtx.stroke();
+                riffNotes.forEach((n, idx) => {
+                    const px = startX + idx * (pillW + 4);
+                    const py = cardY + cardH * 0.65;
+                    roundRect(targetCtx, px, py, pillW, 34, 8, 'rgba(239, 68, 68, 0.22)', 'rgba(239, 68, 68, 0.55)');
+                    targetCtx.fillStyle = '#ffffff';
+                    targetCtx.font = `800 ${Math.round(w * 0.036)}px Inter, sans-serif`;
+                    targetCtx.fillText(n, px + pillW / 2, py + 22);
+                });
 
-            targetCtx.fillStyle = '#e9d5ff';
-            targetCtx.font = '800 18px Inter, sans-serif';
-            targetCtx.fillText('SÓ 3 ACORDES FÁCEIS', 0, -24);
+                if (scene.tip) {
+                    targetCtx.fillStyle = '#d4d4d8';
+                    targetCtx.font = `500 ${Math.round(w * 0.033)}px Inter, sans-serif`;
+                    targetCtx.fillText(scene.tip, w / 2, h * 0.71);
+                }
+            } else {
+                // CENAS DE NOTA ISOLADA OU PLAYTHROUGH
+                const noteObj = RIFF_NOTES[currentNoteKey] || RIFF_NOTES.E_7;
 
-            targetCtx.fillStyle = '#c084fc';
-            targetCtx.font = '800 25px Inter, sans-serif';
-            targetCtx.fillText('A  •  D  •  E', 0, 14);
+                const badgeText = scene.type === 'note' ? scene.step : scene.loopNum;
+                roundRect(targetCtx, w * 0.26, h * 0.155, w * 0.48, 28, 14, 'rgba(239, 68, 68, 0.2)', 'rgba(239, 68, 68, 0.45)');
+                targetCtx.fillStyle = '#fecaca';
+                targetCtx.font = `700 ${Math.round(w * 0.031)}px Inter, sans-serif`;
+                targetCtx.fillText(badgeText.toUpperCase(), w / 2, h * 0.155 + 18);
 
-            targetCtx.fillStyle = '#a1a1aa';
-            targetCtx.font = '500 11px Inter, sans-serif';
-            targetCtx.fillText(seg.tip, 0, 48);
+                // Número grande da casa atual
+                targetCtx.save();
+                const scale = 1 + pulseVal * 0.08;
+                targetCtx.translate(w / 2, h * 0.25);
+                targetCtx.scale(scale, scale);
+                targetCtx.fillStyle = noteObj.color;
+                targetCtx.font = `800 ${Math.round(w * 0.14)}px Inter, sans-serif`;
+                targetCtx.fillText(`Fret ${noteObj.name}`, 0, 0);
+                targetCtx.restore();
 
-            targetCtx.restore();
-        }
+                targetCtx.fillStyle = '#a1a1aa';
+                targetCtx.font = `500 ${Math.round(w * 0.033)}px Inter, sans-serif`;
+                targetCtx.fillText(noteObj.fullName, w / 2, h * 0.29);
 
-        function drawChordLesson(targetCtx, w, h, centerY, seg, pulse, activeStrum) {
-            const chord = CHORDS[seg.chordKey];
-            const topY = centerY - 155;
+                // Diagrama do braço (casas 2 a 10)
+                drawFretboard(targetCtx, w, h, noteObj, pulseVal);
 
-            // Badge superior
-            targetCtx.fillStyle = 'rgba(255,255,255,0.09)';
-            roundRect(targetCtx, w / 2 - 68, topY, 136, 24, 12);
-            targetCtx.fill();
+                // Barra com as 7 notas do riff sincronizadas
+                drawRiffPattern(targetCtx, w, h, seqIdx, scene.type === 'playthrough');
 
-            targetCtx.fillStyle = '#d4d4d8';
-            targetCtx.font = '600 11px Inter, sans-serif';
-            targetCtx.fillText(seg.type === 'playthrough' ? 'TOQUE JUNTO' : seg.step.toUpperCase(), w / 2, topY + 16);
-
-            // Nome do Acorde
-            targetCtx.fillStyle = chord.color;
-            targetCtx.font = '800 54px Inter, sans-serif';
-            targetCtx.fillText(chord.name, w / 2, topY + 76);
-
-            targetCtx.fillStyle = '#a1a1aa';
-            targetCtx.font = '500 13px Inter, sans-serif';
-            targetCtx.fillText(chord.fullName, w / 2, topY + 98);
-
-            // Diagrama do Braço do Violão
-            drawFretboard(targetCtx, w / 2, topY + 132, chord, pulse);
-
-            // Padrão de Batida
-            drawStrumIndicator(targetCtx, w / 2, topY + 305, chord.color, activeStrum);
-
-            // Dica de execução
-            if (seg.tip) {
+                // Dica
                 targetCtx.fillStyle = '#e4e4e7';
-                targetCtx.font = '500 12px Inter, sans-serif';
-                targetCtx.fillText(`💡 ${seg.tip}`, w / 2, topY + 356);
+                targetCtx.font = `500 ${Math.round(w * 0.032)}px Inter, sans-serif`;
+                wrapText(targetCtx, scene.tip, w / 2, h * 0.78, w * 0.84, 18);
+            }
+
+            if (!isExport && !isPlaying && elapsedTime === 0) {
+                targetCtx.fillStyle = 'rgba(0, 0, 0, 0.45)';
+                targetCtx.fillRect(0, 0, w, h);
+                roundRect(targetCtx, w * 0.22, h * 0.46, w * 0.56, 46, 23, '#dc2626', '#f87171');
+                targetCtx.fillStyle = '#ffffff';
+                targetCtx.font = `700 ${Math.round(w * 0.038)}px Inter, sans-serif`;
+                targetCtx.fillText('▶ Start Riff Lesson', w / 2, h * 0.46 + 29);
             }
         }
 
-        function drawFretboard(targetCtx, centerX, startY, chord, pulse) {
-            const boardW = 164;
-            const boardH = 144;
-            const leftX = centerX - boardW / 2;
+        function drawFretboard(targetCtx, w, h, noteObj, pulseVal) {
+            const boxW = w * 0.78;
+            const boxH = h * 0.30;
+            const boxX = (w - boxW) / 2;
+            const boxY = h * 0.32;
+
+            roundRect(targetCtx, boxX, boxY, boxW, boxH, 20, 'rgba(24, 24, 27, 0.92)', 'rgba(255, 255, 255, 0.12)');
+
+            const padX = boxW * 0.16;
+            const padTop = boxH * 0.16;
+            const padBottom = boxH * 0.12;
+            const gridW = boxW - padX * 2;
+            const gridH = boxH - padTop - padBottom;
+            const startX = boxX + padX;
+            const startY = boxY + padTop;
+
             const numStrings = 6;
-            const numFrets = 4;
-            const stringSpacing = boardW / (numStrings - 1);
-            const fretSpacing = boardH / numFrets;
+            const startFret = 2;
+            const endFret = 10;
+            const numFrets = endFret - startFret + 1;
+            const stringSpacing = gridW / (numStrings - 1);
+            const fretSpacing = gridH / numFrets;
 
-            // Fundo do diagrama
-            targetCtx.fillStyle = 'rgba(24, 24, 27, 0.88)';
-            targetCtx.strokeStyle = 'rgba(255, 255, 255, 0.14)';
-            targetCtx.lineWidth = 1;
-            roundRect(targetCtx, leftX - 20, startY - 24, boardW + 40, boardH + 40, 16);
-            targetCtx.fill();
-            targetCtx.stroke();
+            const stringNames = ['E', 'A', 'D', 'G', 'B', 'e'];
+            targetCtx.font = `700 ${Math.round(w * 0.028)}px Inter, sans-serif`;
+            targetCtx.textAlign = 'center';
 
-            // Pestana superior (Nut)
-            targetCtx.fillStyle = '#e4e4e7';
-            targetCtx.fillRect(leftX - 2, startY - 3, boardW + 4, 5);
+            for (let s = 0; s < numStrings; s++) {
+                const sx = startX + s * stringSpacing;
+                const isFifthString = s === 1;
+                targetCtx.fillStyle = isFifthString ? '#ef4444' : '#71717a';
+                targetCtx.fillText(stringNames[s], sx, startY - 16);
 
-            // Trastes horizontais
-            targetCtx.strokeStyle = '#52525b';
-            targetCtx.lineWidth = 1.5;
-            for (let f = 1; f <= numFrets; f++) {
-                const y = startY + f * fretSpacing;
-                targetCtx.beginPath();
-                targetCtx.moveTo(leftX, y);
-                targetCtx.lineTo(leftX + boardW, y);
-                targetCtx.stroke();
-
-                targetCtx.fillStyle = '#71717a';
-                targetCtx.font = '600 9px Inter, sans-serif';
-                targetCtx.fillText(`${f}`, leftX - 12, y - fretSpacing / 2 + 3);
+                const state = noteObj.strings[s];
+                targetCtx.fillStyle = state === 'X' ? '#52525b' : '#ffffff';
+                targetCtx.fillText(state, sx, startY - 4);
             }
 
-            // Cordas verticais (6ª à 1ª)
-            for (let s = 0; s < numStrings; s++) {
-                const x = leftX + s * stringSpacing;
-                const status = chord.strings[s];
-
-                targetCtx.strokeStyle = status === 'X' ? '#3f3f46' : (pulse > 0.1 ? chord.color : '#a1a1aa');
-                targetCtx.lineWidth = 1.2 + (5 - s) * 0.25 + (status !== 'X' ? pulse * 1.4 : 0);
-                targetCtx.beginPath();
-                targetCtx.moveTo(x, startY);
-                targetCtx.lineTo(x, startY + boardH);
-                targetCtx.stroke();
-
-                targetCtx.font = '700 11px Inter, sans-serif';
-                if (status === 'X') {
+            // Marcadores laterais das casas 3, 5, 7, 9
+            const markerFrets = [3, 5, 7, 9];
+            targetCtx.fillStyle = '#a1a1aa';
+            targetCtx.font = `600 ${Math.round(w * 0.025)}px Inter, sans-serif`;
+            for (let f = 0; f < numFrets; f++) {
+                const fretNum = startFret + f;
+                const fyCenter = startY + (f + 0.5) * fretSpacing + 4;
+                if (markerFrets.includes(fretNum)) {
                     targetCtx.fillStyle = '#ef4444';
-                    targetCtx.fillText('×', x, startY - 8);
-                } else if (status === '0') {
-                    targetCtx.fillStyle = '#4ade80';
-                    targetCtx.fillText('○', x, startY - 8);
+                    targetCtx.fillText(`${fretNum}`, startX - 18, fyCenter);
+                } else {
+                    targetCtx.fillStyle = '#52525b';
+                    targetCtx.fillText(`${fretNum}`, startX - 18, fyCenter);
                 }
             }
 
-            // Pestana, caso o acorde use uma.
-            if (chord.barre) {
-                const y = startY + (chord.barre.fret - 0.5) * fretSpacing;
-                const x1 = leftX + (6 - chord.barre.fromString) * stringSpacing;
-                const x2 = leftX + (6 - chord.barre.toString) * stringSpacing;
-
-                targetCtx.fillStyle = chord.color;
-                roundRect(targetCtx, x1 - 9, y - 9, (x2 - x1) + 18, 18, 9);
-                targetCtx.fill();
-
-                targetCtx.fillStyle = '#09090b';
-                targetCtx.font = '800 11px Inter, sans-serif';
-                targetCtx.fillText(chord.barre.finger, (x1 + x2) / 2, y + 4);
+            // Trastes horizontais
+            for (let f = 0; f <= numFrets; f++) {
+                const fy = startY + f * fretSpacing;
+                targetCtx.beginPath();
+                targetCtx.moveTo(startX, fy);
+                targetCtx.lineTo(startX + gridW, fy);
+                targetCtx.lineWidth = 1.5;
+                targetCtx.strokeStyle = 'rgba(255, 255, 255, 0.16)';
+                targetCtx.stroke();
             }
 
-            // Bolinhas dos dedos
-            chord.fingers.forEach(f => {
-                const stringIdx = 6 - f.string;
-                const x = leftX + stringIdx * stringSpacing;
-                const y = startY + (f.fret - 0.5) * fretSpacing;
-
-                targetCtx.fillStyle = chord.color;
+            // Cordas verticais (destaque na 5ª corda - índice 1)
+            for (let s = 0; s < numStrings; s++) {
+                const sx = startX + s * stringSpacing;
+                const isFifth = s === 1;
                 targetCtx.beginPath();
-                targetCtx.arc(x, y, 10, 0, Math.PI * 2);
+                targetCtx.moveTo(sx, startY);
+                targetCtx.lineTo(sx, startY + gridH);
+                targetCtx.lineWidth = isFifth ? (2.6 + pulseVal * 1.4) : 1.1;
+                targetCtx.strokeStyle = isFifth ? '#ef4444' : 'rgba(255, 255, 255, 0.22)';
+                targetCtx.stroke();
+            }
+
+            // Bolinha do dedo na casa atual
+            noteObj.fingers.forEach(item => {
+                const sIdx = 6 - item.string;
+                const relFret = item.fret - startFret + 1;
+                if (relFret < 1 || relFret > numFrets) return;
+
+                const cx = startX + sIdx * stringSpacing;
+                const cy = startY + (relFret - 0.5) * fretSpacing;
+                const radius = Math.min(stringSpacing, fretSpacing) * 0.44 + pulseVal * 2;
+
+                targetCtx.beginPath();
+                targetCtx.arc(cx, cy, radius, 0, Math.PI * 2);
+                targetCtx.fillStyle = noteObj.color;
                 targetCtx.fill();
 
                 targetCtx.fillStyle = '#09090b';
-                targetCtx.font = '800 11px Inter, sans-serif';
-                targetCtx.fillText(f.finger, x, y + 4);
+                targetCtx.font = `800 ${Math.round(radius * 1.05)}px Inter, sans-serif`;
+                targetCtx.fillText(item.fret.toString(), cx, cy + radius * 0.36);
             });
         }
 
-        function drawStrumIndicator(targetCtx, centerX, y, accentColor, activeStrum) {
-            const boxW = 246;
-            const stepW = boxW / STRUM_PATTERN.length;
-            const startX = centerX - boxW / 2;
+        function drawRiffPattern(targetCtx, w, h, activeIdx, isLoop) {
+            const boxW = w * 0.84;
+            const boxH = h * 0.105;
+            const boxX = (w - boxW) / 2;
+            const boxY = h * 0.645;
 
-            targetCtx.fillStyle = 'rgba(255,255,255,0.06)';
-            roundRect(targetCtx, startX - 8, y - 16, boxW + 16, 36, 10);
-            targetCtx.fill();
+            roundRect(targetCtx, boxX, boxY, boxW, boxH, 16, 'rgba(24, 24, 27, 0.85)', 'rgba(239, 68, 68, 0.3)');
 
-            STRUM_PATTERN.forEach((step, idx) => {
-                const x = startX + idx * stepW + stepW / 2;
-                const isActive = activeStrum === idx && step.active;
+            targetCtx.fillStyle = '#a1a1aa';
+            targetCtx.font = `700 ${Math.round(w * 0.024)}px Inter, sans-serif`;
+            targetCtx.fillText('RIFF SEQUENCE (5TH STRING)', w / 2, boxY + 16);
 
-                targetCtx.font = isActive ? '800 18px Inter, sans-serif' : '600 14px Inter, sans-serif';
-                targetCtx.fillStyle = isActive ? accentColor : (step.active ? '#e4e4e7' : '#52525b');
-                targetCtx.fillText(step.dir, x, y + 7);
+            const stepW = (boxW - 24) / RIFF_EVENTS.length;
+            const startX = boxX + 12 + stepW / 2;
+
+            RIFF_EVENTS.forEach((ev, idx) => {
+                const x = startX + idx * stepW;
+                const y = boxY + boxH * 0.66;
+                const isActive = isLoop && idx === activeIdx;
+
+                if (isActive) {
+                    roundRect(targetCtx, x - stepW * 0.42, y - 16, stepW * 0.84, 26, 8, 'rgba(239, 68, 68, 0.35)', '#ef4444');
+                }
+
+                targetCtx.fillStyle = isActive ? '#ffffff' : '#71717a';
+                targetCtx.font = `800 ${Math.round(w * (isActive ? 0.044 : 0.036))}px Inter, sans-serif`;
+                targetCtx.fillText(ev.label, x, y + 3);
             });
         }
 
-        function drawProgressionBar(targetCtx, w, h, seg, isExportMode) {
-            const chordsOrder = ['A', 'D', 'E'];
-            const barY = isExportMode ? h - 55 : h - 88;
-            const pillW = 46;
-            const gap = 8;
-            const totalW = chordsOrder.length * pillW + (chordsOrder.length - 1) * gap;
-            const startX = (w - totalW) / 2;
-
-            chordsOrder.forEach((cKey, idx) => {
-                const x = startX + idx * (pillW + gap);
-                const isCurrent = seg.chordKey === cKey;
-                const chordObj = CHORDS[cKey];
-
-                targetCtx.fillStyle = isCurrent ? chordObj.color : 'rgba(39, 39, 42, 0.85)';
-                roundRect(targetCtx, x, barY, pillW, 26, 8);
-                targetCtx.fill();
-
-                targetCtx.fillStyle = isCurrent ? '#09090b' : '#a1a1aa';
-                targetCtx.font = '800 12px Inter, sans-serif';
-                targetCtx.fillText(cKey, x + pillW / 2, barY + 17);
-            });
-        }
-
-        function drawOutro(targetCtx, w, h, seg) {
-            const centerY = h * 0.48;
-            targetCtx.fillStyle = 'rgba(192, 132, 252, 0.15)';
-            targetCtx.strokeStyle = 'rgba(192, 132, 252, 0.45)';
-            roundRect(targetCtx, w / 2 - 140, centerY - 65, 280, 130, 20);
-            targetCtx.fill();
-            targetCtx.stroke();
-
-            targetCtx.fillStyle = '#f3e8ff';
-            targetCtx.font = '800 22px Inter, sans-serif';
-            targetCtx.fillText(seg.title, w / 2, centerY - 12);
-
-            targetCtx.fillStyle = '#c084fc';
-            targetCtx.font = '600 12px Inter, sans-serif';
-            targetCtx.fillText(seg.subtitle, w / 2, centerY + 24);
-        }
-
-        function roundRect(targetCtx, x, y, width, height, radius) {
+        function roundRect(targetCtx, x, y, width, height, radius, fill, stroke) {
             targetCtx.beginPath();
             targetCtx.moveTo(x + radius, y);
             targetCtx.lineTo(x + width - radius, y);
@@ -813,11 +545,349 @@
             targetCtx.lineTo(x, y + radius);
             targetCtx.quadraticCurveTo(x, y, x + radius, y);
             targetCtx.closePath();
+            if (fill) {
+                targetCtx.fillStyle = fill;
+                targetCtx.fill();
+            }
+            if (stroke) {
+                targetCtx.lineWidth = 1.5;
+                targetCtx.strokeStyle = stroke;
+                targetCtx.stroke();
+            }
         }
 
-        window.addEventListener('load', () => {
-            resizeCanvas();
+        function wrapText(targetCtx, text, x, y, maxWidth, lineHeight) {
+            const words = text.split(' ');
+            let line = '';
+            let currentY = y;
+            for (let n = 0; n < words.length; n++) {
+                const testLine = line + words[n] + ' ';
+                const metrics = targetCtx.measureText(testLine);
+                if (metrics.width > maxWidth && n > 0) {
+                    targetCtx.fillText(line, x, currentY);
+                    line = words[n] + ' ';
+                    currentY += lineHeight;
+                } else {
+                    line = testLine;
+                }
+            }
+            targetCtx.fillText(line, x, currentY);
+        }
+
+        // Loop principal em tempo real
+        function loop(timestamp) {
+            if (!isPlaying) return;
+            if (!lastTimestamp) lastTimestamp = timestamp;
+            const dt = (timestamp - lastTimestamp) / 1000;
+            lastTimestamp = timestamp;
+
+            elapsedTime += dt;
+            strumVisualPulse = Math.max(0, strumVisualPulse - dt * 2.8);
+
+            if (elapsedTime >= totalDuration) {
+                elapsedTime = totalDuration;
+                progressBar.style.width = '100%';
+                pauseVideo();
+                renderFrame();
+                return;
+            }
+
+            progressBar.style.width = `${(elapsedTime / totalDuration) * 100}%`;
+
+            const scene = getCurrentScene(elapsedTime);
+            const sceneProgress = (elapsedTime - scene.start) / (scene.end - scene.start);
+
+            if (scene.type === 'note') {
+                activeNoteKey = scene.noteKey;
+                activeSeqIndex = -1;
+                let eventIdx = -1;
+                for (let i = 0; i < NOTE_DEMO_EVENTS.length; i++) {
+                    if (sceneProgress >= NOTE_DEMO_EVENTS[i].at) eventIdx = i;
+                }
+                const globalStep = Math.floor(scene.start * 100) + eventIdx;
+                if (eventIdx >= 0 && globalStep !== lastTriggeredStep) {
+                    lastTriggeredStep = globalStep;
+                    playRiffNote(scene.noteKey, NOTE_DEMO_EVENTS[eventIdx].dur);
+                }
+            } else if (scene.type === 'playthrough') {
+                let eventIdx = 0;
+                for (let i = 0; i < RIFF_EVENTS.length; i++) {
+                    if (sceneProgress >= RIFF_EVENTS[i].at) eventIdx = i;
+                }
+                const ev = RIFF_EVENTS[eventIdx];
+                activeNoteKey = ev.noteKey;
+                activeSeqIndex = eventIdx;
+
+                const globalStep = Math.floor(scene.start * 100) + eventIdx;
+                if (globalStep !== lastTriggeredStep) {
+                    lastTriggeredStep = globalStep;
+                    playRiffNote(ev.noteKey, ev.dur);
+                }
+            } else {
+                activeSeqIndex = -1;
+            }
+
+            renderFrame();
+            requestAnimationFrame(loop);
+        }
+
+        function renderFrame() {
+            const rect = canvas.parentElement.getBoundingClientRect();
+            const w = rect.width || 360;
+            const h = rect.height || 640;
+            renderScene(ctx, w, h, elapsedTime, strumVisualPulse, activeNoteKey, activeSeqIndex, false);
+        }
+
+        async function playVideo() {
+            if (isRendering) return;
+            await initAudio();
+            if (elapsedTime >= totalDuration) {
+                elapsedTime = 0;
+                lastTriggeredStep = -1;
+            }
+            isPlaying = true;
+            lastTimestamp = null;
+            playIcon.textContent = '⏸';
+            playText.textContent = 'Pause';
+            requestAnimationFrame(loop);
+        }
+
+        function pauseVideo() {
+            isPlaying = false;
+            playIcon.textContent = '▶';
+            playText.textContent = elapsedTime >= totalDuration ? 'Replay' : 'Play';
+        }
+
+        // Exportador Offline Rápido em 720p HD (MP4 nativo via WebCodecs + mp4-muxer)
+        async function exportHighQualityMP4() {
+            if (isRendering) return;
+            if (typeof VideoEncoder === 'undefined' || typeof Mp4Muxer === 'undefined') {
+                renderStatusText.textContent = 'WebCodecs unsupported in this browser';
+                recordingBadge.classList.remove('hidden');
+                setTimeout(() => recordingBadge.classList.add('hidden'), 3000);
+                return;
+            }
+
+            pauseVideo();
+            isRendering = true;
+            downloadBtn.disabled = true;
+            playPauseBtn.disabled = true;
+            restartBtn.disabled = true;
+            recordingBadge.classList.remove('hidden');
+            renderStatusText.textContent = 'Rendering 720p Audio...';
+            downloadText.textContent = 'Rendering...';
+
+            const WIDTH = 720;
+            const HEIGHT = 1280;
+            const FPS = 30;
+            const TOTAL_FRAMES = totalDuration * FPS;
+            const SAMPLE_RATE = 44100;
+
+            try {
+                // 1. Sintetiza áudio offline perfeito com Tone.Offline
+                const renderedBuffer = await Tone.Offline(({ transport, destination, context }) => {
+                    const offlineSynth = createGuitarRig(destination, context);
+
+                    TIMELINE.forEach(scene => {
+                        if (scene.type === 'note') {
+                            const dur = scene.end - scene.start;
+                            NOTE_DEMO_EVENTS.forEach(ev => {
+                                const time = scene.start + ev.at * dur;
+                                const noteData = RIFF_NOTES[scene.noteKey];
+                                offlineSynth.triggerAttackRelease(noteData.notes, ev.dur, time, 0.9);
+                            });
+                        } else if (scene.type === 'playthrough') {
+                            const dur = scene.end - scene.start;
+                            RIFF_EVENTS.forEach(ev => {
+                                const time = scene.start + ev.at * dur;
+                                const noteData = RIFF_NOTES[ev.noteKey];
+                                offlineSynth.triggerAttackRelease(noteData.notes, ev.dur, time, 0.9);
+                            });
+                        }
+                    });
+
+                    transport.start(0);
+                }, totalDuration, 2, SAMPLE_RATE);
+
+                // 2. Seleciona perfil H.264 compatível com o hardware
+                const candidateCodecs = ['avc1.42001f', 'avc1.4d001f', 'avc1.64001f', 'avc1.42E01E'];
+                let selectedCodec = null;
+                for (const codec of candidateCodecs) {
+                    const support = await VideoEncoder.isConfigSupported({
+                        codec,
+                        width: WIDTH,
+                        height: HEIGHT,
+                        bitrate: 3_500_000,
+                        framerate: FPS
+                    });
+                    if (support.supported) {
+                        selectedCodec = codec;
+                        break;
+                    }
+                }
+                if (!selectedCodec) throw new Error('No compatible H.264 encoder found.');
+
+                // 3. Configura Muxer MP4
+                const muxer = new Mp4Muxer.Muxer({
+                    target: new Mp4Muxer.ArrayBufferTarget(),
+                    video: { codec: 'avc', width: WIDTH, height: HEIGHT },
+                    audio: { codec: 'aac', numberOfChannels: 2, sampleRate: SAMPLE_RATE },
+                    fastStart: 'in-memory'
+                });
+
+                const videoEncoder = new VideoEncoder({
+                    output: (chunk, meta) => muxer.addVideoChunk(chunk, meta),
+                    error: e => console.error('VideoEncoder error:', e)
+                });
+                videoEncoder.configure({
+                    codec: selectedCodec,
+                    width: WIDTH,
+                    height: HEIGHT,
+                    bitrate: 3_500_000,
+                    framerate: FPS
+                });
+
+                const audioEncoder = new AudioEncoder({
+                    output: (chunk, meta) => muxer.addAudioChunk(chunk, meta),
+                    error: e => console.error('AudioEncoder error:', e)
+                });
+                audioEncoder.configure({
+                    codec: 'mp4a.40.2',
+                    numberOfChannels: 2,
+                    sampleRate: SAMPLE_RATE,
+                    bitrate: 128_000
+                });
+
+                // 4. Codifica o áudio offline em blocos AudioData
+                const audioBuf = renderedBuffer.get();
+                const left = audioBuf.getChannelData(0);
+                const right = audioBuf.numberOfChannels > 1 ? audioBuf.getChannelData(1) : left;
+                const chunkSize = 1024;
+                for (let offset = 0; offset < left.length; offset += chunkSize) {
+                    const len = Math.min(chunkSize, left.length - offset);
+                    const planar = new Float32Array(len * 2);
+                    planar.set(left.subarray(offset, offset + len), 0);
+                    planar.set(right.subarray(offset, offset + len), len);
+
+                    const audioData = new AudioData({
+                        format: 'f32-planar',
+                        sampleRate: SAMPLE_RATE,
+                        numberOfFrames: len,
+                        numberOfChannels: 2,
+                        timestamp: Math.round((offset / SAMPLE_RATE) * 1_000_000),
+                        data: planar
+                    });
+                    audioEncoder.encode(audioData);
+                    audioData.close();
+                }
+                await audioEncoder.flush();
+
+                // 5. Renderiza os 960 quadros em 720x1280 offline
+                const offCanvas = document.createElement('canvas');
+                offCanvas.width = WIDTH;
+                offCanvas.height = HEIGHT;
+                const offCtx = offCanvas.getContext('2d');
+
+                for (let frame = 0; frame < TOTAL_FRAMES; frame++) {
+                    const t = frame / FPS;
+                    const scene = getCurrentScene(t);
+                    const sceneProgress = (t - scene.start) / (scene.end - scene.start);
+
+                    let noteKey = 'E_7';
+                    let seqIdx = -1;
+                    let pulse = 0;
+
+                    if (scene.type === 'note') {
+                        noteKey = scene.noteKey;
+                        for (let i = 0; i < NOTE_DEMO_EVENTS.length; i++) {
+                            if (sceneProgress >= NOTE_DEMO_EVENTS[i].at) {
+                                const dtNote = (sceneProgress - NOTE_DEMO_EVENTS[i].at) * (scene.end - scene.start);
+                                pulse = Math.max(0, 1 - dtNote * 3.0);
+                            }
+                        }
+                    } else if (scene.type === 'playthrough') {
+                        for (let i = 0; i < RIFF_EVENTS.length; i++) {
+                            if (sceneProgress >= RIFF_EVENTS[i].at) {
+                                seqIdx = i;
+                                noteKey = RIFF_EVENTS[i].noteKey;
+                                const dtNote = (sceneProgress - RIFF_EVENTS[i].at) * (scene.end - scene.start);
+                                pulse = Math.max(0, 1 - dtNote * 3.2);
+                            }
+                        }
+                    }
+
+                    renderScene(offCtx, WIDTH, HEIGHT, t, pulse, noteKey, seqIdx, true);
+
+                    const videoFrame = new VideoFrame(offCanvas, {
+                        timestamp: Math.round((frame / FPS) * 1_000_000),
+                        duration: Math.round((1 / FPS) * 1_000_000)
+                    });
+                    videoEncoder.encode(videoFrame, { keyFrame: frame % 30 === 0 });
+                    videoFrame.close();
+
+                    if (videoEncoder.encodeQueueSize > 8) {
+                        await new Promise(r => setTimeout(r, 5));
+                    }
+                    if (frame % 30 === 0) {
+                        const pct = Math.round((frame / TOTAL_FRAMES) * 100);
+                        renderStatusText.textContent = `Rendering 720p (${pct}%)...`;
+                        await new Promise(r => setTimeout(r, 0));
+                    }
+                }
+
+                await videoEncoder.flush();
+                muxer.finalize();
+
+                const blob = new Blob([muxer.target.buffer], { type: 'video/mp4' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'seven-nation-army-720p.mp4';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            } catch (err) {
+                console.error('Export failed:', err);
+                renderStatusText.textContent = 'Export error';
+            } finally {
+                isRendering = false;
+                downloadBtn.disabled = false;
+                playPauseBtn.disabled = false;
+                restartBtn.disabled = false;
+                downloadText.textContent = 'Download Video';
+                setTimeout(() => recordingBadge.classList.add('hidden'), 1500);
+            }
+        }
+
+        // Eventos dos botões e do canvas
+        playPauseBtn.addEventListener('click', () => {
+            if (isPlaying) pauseVideo();
+            else playVideo();
         });
+
+        canvas.addEventListener('click', () => {
+            if (isPlaying) pauseVideo();
+            else playVideo();
+        });
+
+        restartBtn.addEventListener('click', () => {
+            elapsedTime = 0;
+            lastTriggeredStep = -1;
+            strumVisualPulse = 0;
+            progressBar.style.width = '0%';
+            renderFrame();
+            if (!isPlaying) playVideo();
+        });
+
+        downloadBtn.addEventListener('click', exportHighQualityMP4);
+
+        // Inicializa imediatamente e também no load para garantir visibilidade
+        resizeCanvas();
+        window.addEventListener('load', resizeCanvas);
+        if (typeof ResizeObserver !== 'undefined') {
+            new ResizeObserver(() => resizeCanvas()).observe(canvas.parentElement);
+        }
     </script>
 </body>
 </html>
