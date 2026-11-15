@@ -35,7 +35,7 @@
         <label for="songSelect" class="mb-2 block text-sm font-semibold text-zinc-200">Selecione a música</label>
         <select id="songSelect" class="w-full rounded-xl border border-zinc-700 bg-zinc-900 px-4 py-3 text-sm text-white shadow-lg focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-500/40">
             <option value="seven-nation-army" selected>Seven Nation Army — The White Stripes</option>
-            <option value="pink-panther" disabled>Pantera Cor-de-Rosa (em breve)</option>
+            <option value="pink-panther">Estudo de jazz original (não é a música da Pantera Cor-de-Rosa)</option>
         </select>
     </div>
 
@@ -244,8 +244,110 @@
             { start: 29.61, end: 32.0, type: 'outro', title: '7 - 7 - 10 - 7 - 5 - 3 - 2', subtitle: 'Play on the 5th (A) string • Turn up the fuzz!' }
         ];
 
+        const JAZZ_NOTES = {
+            E_7: {
+                name: '7',
+                fullName: 'E note (5th string, 7th fret)',
+                notes: ['E3'],
+                strings: ['X', '7', 'X', 'X', 'X', 'X'],
+                fingers: [{ string: 5, fret: 7, finger: '1' }],
+                color: '#f0abfc'
+            },
+            G_10: {
+                name: '10',
+                fullName: 'G note (5th string, 10th fret)',
+                notes: ['G3'],
+                strings: ['X', '10', 'X', 'X', 'X', 'X'],
+                fingers: [{ string: 5, fret: 10, finger: '4' }],
+                color: '#c4b5fd'
+            },
+            F_8: {
+                name: '8',
+                fullName: 'F note (5th string, 8th fret)',
+                notes: ['F3'],
+                strings: ['X', '8', 'X', 'X', 'X', 'X'],
+                fingers: [{ string: 5, fret: 8, finger: '2' }],
+                color: '#f9a8d4'
+            },
+            D_5: {
+                name: '5',
+                fullName: 'D note (5th string, 5th fret)',
+                notes: ['D3'],
+                strings: ['X', '5', 'X', 'X', 'X', 'X'],
+                fingers: [{ string: 5, fret: 5, finger: '1' }],
+                color: '#fdba74'
+            },
+            C_3: {
+                name: '3',
+                fullName: 'C note (5th string, 3rd fret)',
+                notes: ['C3'],
+                strings: ['X', '3', 'X', 'X', 'X', 'X'],
+                fingers: [{ string: 5, fret: 3, finger: '1' }],
+                color: '#fde68a'
+            },
+            B_2: {
+                name: '2',
+                fullName: 'B note (5th string, 2nd fret)',
+                notes: ['B2'],
+                strings: ['X', '2', 'X', 'X', 'X', 'X'],
+                fingers: [{ string: 5, fret: 2, finger: '1' }],
+                color: '#a7f3d0'
+            }
+        };
+
+        const JAZZ_EVENTS = [
+            { at: 0.000, noteKey: 'D_5', label: '5', dur: 0.42 },
+            { at: 0.125, noteKey: 'F_8', label: '8', dur: 0.28 },
+            { at: 0.250, noteKey: 'E_7', label: '7', dur: 0.38 },
+            { at: 0.375, noteKey: 'G_10', label: '10', dur: 0.42 },
+            { at: 0.500, noteKey: 'F_8', label: '8', dur: 0.28 },
+            { at: 0.625, noteKey: 'D_5', label: '5', dur: 0.52 },
+            { at: 0.750, noteKey: 'C_3', label: '3', dur: 0.3 },
+            { at: 0.875, noteKey: 'B_2', label: '2', dur: 0.55 },
+            { at: 0.9375, noteKey: 'D_5', label: '5', dur: 0.38 }
+        ];
+
+        const JAZZ_TIMELINE = [
+            { start: 0, end: 3.5, type: 'intro', title: 'Jazz Felino', subtitle: 'Exercício original de violão • estilo jazz', tip: 'Melodia original com síncopes • Toque devagar e swingado' },
+            { start: 3.5, end: 6.5, type: 'note', noteKey: 'D_5', step: 'Nota 1 • Casa 5', tip: 'Comece na quinta casa da corda Lá' },
+            { start: 6.5, end: 9.5, type: 'note', noteKey: 'F_8', step: 'Nota 2 • Casa 8', tip: 'Alcance a oitava casa sem tensionar a mão' },
+            { start: 9.5, end: 12.5, type: 'note', noteKey: 'E_7', step: 'Nota 3 • Casa 7', tip: 'Volte uma casa e deixe a nota soar' },
+            { start: 12.5, end: 15.5, type: 'note', noteKey: 'G_10', step: 'Nota 4 • Casa 10', tip: 'Use o dedo mínimo para chegar à décima casa' },
+            { start: 15.5, end: 18.0, type: 'note', noteKey: 'C_3', step: 'Nota 5 • Casa 3', tip: 'Desça para a terceira casa mantendo o tempo' },
+            { start: 18.0, end: 22.0, type: 'playthrough', loopNum: 'Prática 1', tip: 'Toque as notas com dinâmica suave e sincopada' },
+            { start: 22.0, end: 26.0, type: 'playthrough', loopNum: 'Prática 2', tip: 'Repita o exercício e mantenha o pulso constante' },
+            { start: 26.0, end: 30.0, type: 'playthrough', loopNum: 'Prática 3', tip: 'Experimente acentuar levemente as notas fora do tempo' },
+            { start: 30.0, end: 32.0, type: 'outro', title: '5 - 8 - 7 - 10 - 8 - 5 - 3 - 2 - 5', subtitle: 'Exercício original • Continue praticando o swing' }
+        ];
+
+        const LESSONS = {
+            'seven-nation-army': {
+                notes: RIFF_NOTES,
+                events: RIFF_EVENTS,
+                timeline: TIMELINE,
+                title: 'Seven Nation Army',
+                artist: 'The White Stripes',
+                header: 'THE WHITE STRIPES • RIFF TUTORIAL',
+                noteLabel: 'Fret',
+                patternLabel: 'RIFF SEQUENCE (5TH STRING)',
+                filename: 'seven-nation-army-720p.mp4'
+            },
+            'pink-panther': {
+                notes: JAZZ_NOTES,
+                events: JAZZ_EVENTS,
+                timeline: JAZZ_TIMELINE,
+                title: 'Jazz Felino — Exercício Original',
+                artist: 'Estudo original em estilo jazz',
+                header: 'EXERCÍCIO ORIGINAL DE VIOLÃO • ESTILO JAZZ',
+                noteLabel: 'Casa',
+                patternLabel: 'SEQUÊNCIA ORIGINAL (5ª CORDA)',
+                filename: 'exercicio-jazz-felino-720p.mp4'
+            }
+        };
+
         // Referências de DOM e Canvas
         const canvas = document.getElementById('tutorialCanvas');
+        const songSelect = document.getElementById('songSelect');
         const ctx = canvas.getContext('2d');
         const playPauseBtn = document.getElementById('playPauseBtn');
         const downloadBtn = document.getElementById('downloadBtn');
@@ -260,11 +362,12 @@
         let isPlaying = false;
         let isRendering = false;
         let elapsedTime = 0;
-        const totalDuration = 32;
+        let currentLesson = LESSONS[songSelect.value];
+        let totalDuration = currentLesson.timeline[currentLesson.timeline.length - 1].end;
         let lastTimestamp = null;
         let lastTriggeredStep = -1;
         let strumVisualPulse = 0;
-        let activeNoteKey = 'E_7';
+        let activeNoteKey = currentLesson.events[0].noteKey;
         let activeSeqIndex = -1;
 
         function resizeCanvas() {
@@ -281,7 +384,7 @@
 
         function playRiffNote(noteKey, duration = 0.4, time = undefined) {
             if (!synth) return;
-            const noteData = RIFF_NOTES[noteKey];
+            const noteData = currentLesson.notes[noteKey];
             if (!noteData) return;
             const triggerTime = time !== undefined ? time : Tone.now();
             synth.triggerAttackRelease(noteData.notes, duration, triggerTime, 0.9);
@@ -291,7 +394,8 @@
         }
 
         function getCurrentScene(t) {
-            return TIMELINE.find(s => t >= s.start && t < s.end) || TIMELINE[TIMELINE.length - 1];
+            const timeline = currentLesson.timeline;
+            return timeline.find(s => t >= s.start && t < s.end) || timeline[timeline.length - 1];
         }
 
         // Renderiza qualquer instante 't' em qualquer contexto (tela ou exportação 720p)
@@ -328,11 +432,11 @@
             targetCtx.textAlign = 'center';
             targetCtx.fillStyle = 'rgba(255, 255, 255, 0.92)';
             targetCtx.font = `600 ${Math.round(w * 0.055)}px "Playfair Display", serif`;
-            targetCtx.fillText('“Seven Nation Army”', w / 2, h * 0.095);
+            targetCtx.fillText(`“${currentLesson.title}”`, w / 2, h * 0.095);
 
             targetCtx.fillStyle = '#f87171';
             targetCtx.font = `700 ${Math.round(w * 0.028)}px Inter, sans-serif`;
-            targetCtx.fillText('THE WHITE STRIPES • RIFF TUTORIAL', w / 2, h * 0.125);
+            targetCtx.fillText(currentLesson.header, w / 2, h * 0.125);
 
             // CENA INTRO / OUTRO
             if (scene.type === 'intro' || scene.type === 'outro') {
@@ -349,7 +453,7 @@
                 targetCtx.fillText(scene.subtitle, w / 2, cardY + cardH * 0.50);
 
                 // Pílulas com a sequência do riff
-                const riffNotes = ['7', '7', '10', '7', '5', '3', '2'];
+                const riffNotes = currentLesson.events.map(event => event.label);
                 const pillW = (w * 0.72) / riffNotes.length - 4;
                 const startX = (w - ((pillW + 4) * riffNotes.length - 4)) / 2;
 
@@ -369,7 +473,7 @@
                 }
             } else {
                 // CENAS DE NOTA ISOLADA OU PLAYTHROUGH
-                const noteObj = RIFF_NOTES[currentNoteKey] || RIFF_NOTES.E_7;
+                const noteObj = currentLesson.notes[currentNoteKey] || currentLesson.notes[currentLesson.events[0].noteKey];
 
                 const badgeText = scene.type === 'note' ? scene.step : scene.loopNum;
                 roundRect(targetCtx, w * 0.26, h * 0.155, w * 0.48, 28, 14, 'rgba(239, 68, 68, 0.2)', 'rgba(239, 68, 68, 0.45)');
@@ -384,7 +488,7 @@
                 targetCtx.scale(scale, scale);
                 targetCtx.fillStyle = noteObj.color;
                 targetCtx.font = `800 ${Math.round(w * 0.14)}px Inter, sans-serif`;
-                targetCtx.fillText(`Fret ${noteObj.name}`, 0, 0);
+                targetCtx.fillText(`${currentLesson.noteLabel} ${noteObj.name}`, 0, 0);
                 targetCtx.restore();
 
                 targetCtx.fillStyle = '#a1a1aa';
@@ -521,12 +625,12 @@
 
             targetCtx.fillStyle = '#a1a1aa';
             targetCtx.font = `700 ${Math.round(w * 0.024)}px Inter, sans-serif`;
-            targetCtx.fillText('RIFF SEQUENCE (5TH STRING)', w / 2, boxY + 16);
+            targetCtx.fillText(currentLesson.patternLabel, w / 2, boxY + 16);
 
-            const stepW = (boxW - 24) / RIFF_EVENTS.length;
+            const stepW = (boxW - 24) / currentLesson.events.length;
             const startX = boxX + 12 + stepW / 2;
 
-            RIFF_EVENTS.forEach((ev, idx) => {
+            currentLesson.events.forEach((ev, idx) => {
                 const x = startX + idx * stepW;
                 const y = boxY + boxH * 0.66;
                 const isActive = isLoop && idx === activeIdx;
@@ -619,10 +723,10 @@
                 }
             } else if (scene.type === 'playthrough') {
                 let eventIdx = 0;
-                for (let i = 0; i < RIFF_EVENTS.length; i++) {
-                    if (sceneProgress >= RIFF_EVENTS[i].at) eventIdx = i;
+                for (let i = 0; i < currentLesson.events.length; i++) {
+                    if (sceneProgress >= currentLesson.events[i].at) eventIdx = i;
                 }
-                const ev = RIFF_EVENTS[eventIdx];
+                const ev = currentLesson.events[eventIdx];
                 activeNoteKey = ev.noteKey;
                 activeSeqIndex = eventIdx;
 
@@ -681,6 +785,7 @@
             downloadBtn.disabled = true;
             playPauseBtn.disabled = true;
             restartBtn.disabled = true;
+            songSelect.disabled = true;
             recordingBadge.classList.remove('hidden');
             renderStatusText.textContent = 'Rendering 720p Audio...';
             downloadText.textContent = 'Rendering...';
@@ -696,19 +801,19 @@
                 const renderedBuffer = await Tone.Offline(({ transport, destination, context }) => {
                     const offlineSynth = createGuitarRig(destination, context);
 
-                    TIMELINE.forEach(scene => {
+                    currentLesson.timeline.forEach(scene => {
                         if (scene.type === 'note') {
                             const dur = scene.end - scene.start;
                             NOTE_DEMO_EVENTS.forEach(ev => {
                                 const time = scene.start + ev.at * dur;
-                                const noteData = RIFF_NOTES[scene.noteKey];
+                                const noteData = currentLesson.notes[scene.noteKey];
                                 offlineSynth.triggerAttackRelease(noteData.notes, ev.dur, time, 0.9);
                             });
                         } else if (scene.type === 'playthrough') {
                             const dur = scene.end - scene.start;
-                            RIFF_EVENTS.forEach(ev => {
+                            currentLesson.events.forEach(ev => {
                                 const time = scene.start + ev.at * dur;
-                                const noteData = RIFF_NOTES[ev.noteKey];
+                                const noteData = currentLesson.notes[ev.noteKey];
                                 offlineSynth.triggerAttackRelease(noteData.notes, ev.dur, time, 0.9);
                             });
                         }
@@ -801,7 +906,7 @@
                     const scene = getCurrentScene(t);
                     const sceneProgress = (t - scene.start) / (scene.end - scene.start);
 
-                    let noteKey = 'E_7';
+                    let noteKey = currentLesson.events[0].noteKey;
                     let seqIdx = -1;
                     let pulse = 0;
 
@@ -814,11 +919,11 @@
                             }
                         }
                     } else if (scene.type === 'playthrough') {
-                        for (let i = 0; i < RIFF_EVENTS.length; i++) {
-                            if (sceneProgress >= RIFF_EVENTS[i].at) {
+                        for (let i = 0; i < currentLesson.events.length; i++) {
+                            if (sceneProgress >= currentLesson.events[i].at) {
                                 seqIdx = i;
-                                noteKey = RIFF_EVENTS[i].noteKey;
-                                const dtNote = (sceneProgress - RIFF_EVENTS[i].at) * (scene.end - scene.start);
+                                noteKey = currentLesson.events[i].noteKey;
+                                const dtNote = (sceneProgress - currentLesson.events[i].at) * (scene.end - scene.start);
                                 pulse = Math.max(0, 1 - dtNote * 3.2);
                             }
                         }
@@ -850,7 +955,7 @@
                 const url = URL.createObjectURL(blob);
                 const a = document.createElement('a');
                 a.href = url;
-                a.download = 'seven-nation-army-720p.mp4';
+                a.download = currentLesson.filename;
                 document.body.appendChild(a);
                 a.click();
                 document.body.removeChild(a);
@@ -863,6 +968,7 @@
                 downloadBtn.disabled = false;
                 playPauseBtn.disabled = false;
                 restartBtn.disabled = false;
+                songSelect.disabled = false;
                 downloadText.textContent = 'Download Video';
                 setTimeout(() => recordingBadge.classList.add('hidden'), 1500);
             }
@@ -889,6 +995,22 @@
         });
 
         downloadBtn.addEventListener('click', exportHighQualityMP4);
+
+        songSelect.addEventListener('change', () => {
+            pauseVideo();
+            currentLesson = LESSONS[songSelect.value];
+            totalDuration = currentLesson.timeline[currentLesson.timeline.length - 1].end;
+            document.title = `Tutorial: ${currentLesson.title} — ${currentLesson.artist}`;
+            elapsedTime = 0;
+            lastTimestamp = null;
+            lastTriggeredStep = -1;
+            strumVisualPulse = 0;
+            activeNoteKey = currentLesson.events[0].noteKey;
+            activeSeqIndex = -1;
+            progressBar.style.width = '0%';
+            playText.textContent = 'Play';
+            renderFrame();
+        });
 
         // Inicializa imediatamente e também no load para garantir visibilidade
         resizeCanvas();
