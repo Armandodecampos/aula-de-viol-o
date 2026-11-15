@@ -35,7 +35,7 @@
         <label for="songSelect" class="mb-2 block text-sm font-semibold text-zinc-200">Selecione a música</label>
         <select id="songSelect" class="w-full rounded-xl border border-zinc-700 bg-zinc-900 px-4 py-3 text-sm text-white shadow-lg focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-500/40">
             <option value="seven-nation-army" selected>Seven Nation Army — The White Stripes</option>
-            <option value="pink-panther">Estudo de jazz original (não é a música da Pantera Cor-de-Rosa)</option>
+            <option value="blues-solo">Solo harmônico de blues (original)</option>
         </select>
     </div>
 
@@ -244,116 +244,93 @@
             { start: 29.61, end: 32.0, type: 'outro', title: '7 - 7 - 10 - 7 - 5 - 3 - 2', subtitle: 'Play on the 5th (A) string • Turn up the fuzz!' }
         ];
 
-        const JAZZ_NOTES = {
-            G_6_3: {
-                name: '3',
-                fullName: 'G note (6th string, 3rd fret)',
-                notes: ['G2'],
-                strings: ['3', 'X', 'X', 'X', 'X', 'X'],
-                fingers: [{ string: 6, fret: 3, finger: '2' }],
-                color: '#f0abfc'
-            },
-            C_5_3: {
-                name: '3',
-                fullName: 'C note (5th string, 3rd fret)',
-                notes: ['C3'],
-                strings: ['X', '3', 'X', 'X', 'X', 'X'],
-                fingers: [{ string: 5, fret: 3, finger: '1' }],
-                color: '#c4b5fd'
-            },
-            G_4_5: {
-                name: '5',
-                fullName: 'G note (4th string, 5th fret)',
-                notes: ['G3'],
-                strings: ['X', 'X', '5', 'X', 'X', 'X'],
-                fingers: [{ string: 4, fret: 5, finger: '3' }],
-                color: '#f9a8d4'
-            },
-            C_3_5: {
-                name: '5',
-                fullName: 'C note (3rd string, 5th fret)',
-                notes: ['C4'],
-                strings: ['X', 'X', 'X', '5', 'X', 'X'],
-                fingers: [{ string: 3, fret: 5, finger: '1' }],
-                color: '#fdba74'
-            },
-            G_2_8: {
-                name: '8',
-                fullName: 'G note (2nd string, 8th fret)',
-                notes: ['G4'],
-                strings: ['X', 'X', 'X', 'X', '8', 'X'],
-                fingers: [{ string: 2, fret: 8, finger: '3' }],
-                color: '#fde68a'
-            },
-            C_1_8: {
-                name: '8',
-                fullName: 'C note (1st string, 8th fret)',
-                notes: ['C5'],
-                strings: ['X', 'X', 'X', 'X', 'X', '8'],
-                fingers: [{ string: 1, fret: 8, finger: '3' }],
-                color: '#a7f3d0'
-            },
-            A_2_10: {
-                name: '10',
-                fullName: 'A note (2nd string, 10th fret)',
-                notes: ['A4'],
-                strings: ['X', 'X', 'X', 'X', '10', 'X'],
-                fingers: [{ string: 2, fret: 10, finger: '4' }],
-                color: '#a7f3d0'
-            },
-            E_3_9: {
-                name: '9',
-                fullName: 'E note (3rd string, 9th fret)',
-                notes: ['E4'],
-                strings: ['X', 'X', 'X', '9', 'X', 'X'],
-                fingers: [{ string: 3, fret: 9, finger: '4' }],
-                color: '#f0abfc'
-            },
-            B_4_9: {
-                name: '9',
-                fullName: 'B note (4th string, 9th fret)',
-                notes: ['B3'],
-                strings: ['X', 'X', '9', 'X', 'X', 'X'],
-                fingers: [{ string: 4, fret: 9, finger: '4' }],
-                color: '#c4b5fd'
-            },
-            D_5_5: {
-                name: '5',
-                fullName: 'D note (5th string, 5th fret)',
-                notes: ['D3'],
-                strings: ['X', '5', 'X', 'X', 'X', 'X'],
-                fingers: [{ string: 5, fret: 5, finger: '1' }],
-                color: '#a7f3d0'
-            }
+        function createBluesVoicing(name, fullName, notes, fingers, color) {
+            const strings = ['X', 'X', 'X', 'X', 'X', 'X'];
+            fingers.forEach(({ string, fret }) => {
+                strings[6 - string] = String(fret);
+            });
+            return { name, fullName, notes, strings, fingers, color };
+        }
+
+        const BLUES_NOTES = {
+            A_C_low: createBluesVoicing('A+C', 'A2 + C3 • terça menor de blues, cordas 6 e 5', ['A2', 'C3'], [
+                { string: 6, fret: 5, finger: '3' }, { string: 5, fret: 3, finger: '1' }
+            ], '#fca5a5'),
+            E_G: createBluesVoicing('E+G', 'E3 + G3 • quinta e sétima de A7', ['E3', 'G3'], [
+                { string: 5, fret: 7, finger: '3' }, { string: 4, fret: 5, finger: '1' }
+            ], '#fdba74'),
+            A_C_mid: createBluesVoicing('A+C', 'A3 + C4 • terça menor de blues, cordas 4 e 3', ['A3', 'C4'], [
+                { string: 4, fret: 7, finger: '3' }, { string: 3, fret: 5, finger: '1' }
+            ], '#fde68a'),
+            C_E: createBluesVoicing('C+E', 'C4 + E4 • terça e quinta de Am', ['C4', 'E4'], [
+                { string: 3, fret: 5, finger: '1' }, { string: 2, fret: 5, finger: '1' }
+            ], '#a7f3d0'),
+            G_B: createBluesVoicing('G+B', 'G3 + B3 • sétima e nona de A7', ['G3', 'B3'], [
+                { string: 4, fret: 5, finger: '2' }, { string: 3, fret: 4, finger: '1' }
+            ], '#c4b5fd'),
+            A_C_high: createBluesVoicing('A+C', 'A4 + C5 • terça menor de blues, cordas 2 e 1', ['A4', 'C5'], [
+                { string: 2, fret: 10, finger: '4' }, { string: 1, fret: 8, finger: '2' }
+            ], '#f9a8d4'),
+            G_A: createBluesVoicing('G+A', 'G4 + A4 • resposta aguda nas cordas 2 e 1', ['G4', 'A4'], [
+                { string: 2, fret: 8, finger: '3' }, { string: 1, fret: 5, finger: '1' }
+            ], '#f0abfc'),
+            D_C: createBluesVoicing('D+C', 'D3 + C4 • tônica e sétima de D7', ['D3', 'C4'], [
+                { string: 5, fret: 5, finger: '1' }, { string: 3, fret: 5, finger: '1' }
+            ], '#fdba74'),
+            D_F: createBluesVoicing('D+F', 'D4 + F4 • terça menor de blues sobre D7', ['D4', 'F4'], [
+                { string: 3, fret: 7, finger: '3' }, { string: 2, fret: 6, finger: '2' }
+            ], '#fde68a'),
+            F_A: createBluesVoicing('F+A', 'F3 + A3 • terça menor de blues e quinta de D7', ['F3', 'A3'], [
+                { string: 4, fret: 3, finger: '1' }, { string: 3, fret: 2, finger: '1' }
+            ], '#a7f3d0'),
+            D_A: createBluesVoicing('D+A', 'D3 + A3 • quinta de D7', ['D3', 'A3'], [
+                { string: 5, fret: 5, finger: '1' }, { string: 4, fret: 7, finger: '3' }
+            ], '#c4b5fd'),
+            E_D: createBluesVoicing('E+D', 'D4 + E4 • sétima e tônica de E7', ['D4', 'E4'], [
+                { string: 3, fret: 7, finger: '3' }, { string: 2, fret: 5, finger: '1' }
+            ], '#f9a8d4'),
+            E_B: createBluesVoicing('E+B', 'E3 + B3 • quinta de E7', ['E3', 'B3'], [
+                { string: 5, fret: 7, finger: '1' }, { string: 4, fret: 9, finger: '3' }
+            ], '#f0abfc')
         };
 
-        const JAZZ_EVENTS = [
-            { at: 0.000, noteKey: 'G_6_3', label: '6/3', dur: 0.42 },
-            { at: 0.083, noteKey: 'C_5_3', label: '5/3', dur: 0.3 },
-            { at: 0.166, noteKey: 'G_4_5', label: '4/5', dur: 0.38 },
-            { at: 0.250, noteKey: 'C_3_5', label: '3/5', dur: 0.42 },
-            { at: 0.333, noteKey: 'G_2_8', label: '2/8', dur: 0.3 },
-            { at: 0.416, noteKey: 'C_1_8', label: '1/8', dur: 0.52 },
-            { at: 0.500, noteKey: 'A_2_10', label: '2/10', dur: 0.3 },
-            { at: 0.583, noteKey: 'G_2_8', label: '2/8', dur: 0.38 },
-            { at: 0.666, noteKey: 'E_3_9', label: '3/9', dur: 0.42 },
-            { at: 0.750, noteKey: 'C_3_5', label: '3/5', dur: 0.3 },
-            { at: 0.833, noteKey: 'B_4_9', label: '4/9', dur: 0.52 },
-            { at: 0.916, noteKey: 'D_5_5', label: '5/5', dur: 0.5 }
+        const BLUES_BARS = [
+            { chord: 'A7', notes: ['A_C_low', 'E_G', 'G_B', 'A_C_mid'] },
+            { chord: 'A7', notes: ['A_C_low', 'C_E', 'E_G', 'A_C_high'] },
+            { chord: 'A7', notes: ['A_C_mid', 'E_G', 'G_A', 'A_C_low'] },
+            { chord: 'A7', notes: ['G_B', 'A_C_high', 'E_G', 'A_C_mid'] },
+            { chord: 'D7', notes: ['D_C', 'D_F', 'F_A', 'D_A'] },
+            { chord: 'D7', notes: ['D_C', 'A_C_mid', 'D_F', 'G_B'] },
+            { chord: 'A7', notes: ['A_C_low', 'E_G', 'G_B', 'A_C_mid'] },
+            { chord: 'A7', notes: ['A_C_low', 'C_E', 'G_A', 'A_C_high'] },
+            { chord: 'E7', notes: ['E_D', 'E_B', 'G_A', 'E_G'] },
+            { chord: 'D7', notes: ['D_C', 'D_F', 'F_A', 'D_A'] },
+            { chord: 'A7', notes: ['A_C_mid', 'E_G', 'G_B', 'A_C_low'] },
+            { chord: 'E7', notes: ['E_D', 'E_B', 'A_C_high', 'E_G'] }
         ];
 
-        const JAZZ_TIMELINE = [
-            { start: 0, end: 3.5, type: 'intro', title: 'Jazz Felino', subtitle: 'Exercício original de violão • estilo jazz', tip: 'Sequência corda/casa • Melodia original com síncopes • Toque swingado' },
-            { start: 3.5, end: 6.0, type: 'note', noteKey: 'G_6_3', step: 'Nota 1 • 6ª corda', tip: 'Comece na 6ª corda (Mi grave), casa 3' },
-            { start: 6.0, end: 8.5, type: 'note', noteKey: 'C_5_3', step: 'Nota 2 • 5ª corda', tip: 'Passe para a 5ª corda (Lá), casa 3' },
-            { start: 8.5, end: 11.0, type: 'note', noteKey: 'G_4_5', step: 'Nota 3 • 4ª corda', tip: 'Toque a 4ª corda (Ré), casa 5' },
-            { start: 11.0, end: 13.5, type: 'note', noteKey: 'C_3_5', step: 'Nota 4 • 3ª corda', tip: 'Suba para a 3ª corda (Sol), casa 5' },
-            { start: 13.5, end: 16.0, type: 'note', noteKey: 'G_2_8', step: 'Nota 5 • 2ª corda', tip: 'Continue na 2ª corda (Si), casa 8' },
-            { start: 16.0, end: 18.5, type: 'note', noteKey: 'C_1_8', step: 'Nota 6 • 1ª corda', tip: 'Chegue à 1ª corda (Mi agudo), casa 8' },
-            { start: 18.5, end: 22.5, type: 'playthrough', loopNum: 'Prática 1', tip: 'Percorra as seis cordas com toque leve e regular' },
-            { start: 22.5, end: 26.5, type: 'playthrough', loopNum: 'Prática 2', tip: 'Repita a sequência sem acelerar nas cordas agudas' },
-            { start: 26.5, end: 30.5, type: 'playthrough', loopNum: 'Prática 3', tip: 'Mantenha a dinâmica suave e acentue o contratempo' },
-            { start: 30.5, end: 32.0, type: 'outro', title: 'Exercício original • 6 cordas', subtitle: 'Continue praticando o ritmo e as mudanças de corda' }
+        const BLUES_BAR_OFFSETS = [0, 0.1875, 0.5, 0.75];
+        const BLUES_EVENTS = BLUES_BARS.flatMap((bar, barIndex) =>
+            bar.notes.map((noteKey, eventIndex) => ({
+                at: (barIndex + BLUES_BAR_OFFSETS[eventIndex]) / BLUES_BARS.length,
+                bar: barIndex + 1,
+                noteKey,
+                label: bar.chord,
+                dur: [0.52, 0.3, 0.42, 0.55][eventIndex]
+            }))
+        );
+
+        const BLUES_SEQUENCE = BLUES_BARS.map(bar => bar.chord);
+        const BLUES_TIMELINE = [
+            { start: 0, end: 3.5, type: 'intro', title: 'Blues em Lá', subtitle: 'Solo original harmonizado • 12 compassos', tip: '80 BPM • A7 × 4 • D7 × 2 • A7 × 2 • E7 • D7 • A7 • E7' },
+            { start: 3.5, end: 5.5, type: 'note', noteKey: 'A_C_low', step: 'A7 • terça menor de blues', tip: 'A+C: toque o double-stop nas cordas 6 e 5' },
+            { start: 5.5, end: 7.5, type: 'note', noteKey: 'E_G', step: 'A7 • quinta e sétima', tip: 'E+G: destaque a sétima menor do acorde' },
+            { start: 7.5, end: 9.5, type: 'note', noteKey: 'D_C', step: 'D7 • tônica e sétima', tip: 'D+C: mude junto com o acorde do compasso' },
+            { start: 9.5, end: 11.5, type: 'note', noteKey: 'E_D', step: 'E7 • tônica e sétima', tip: 'E+D: prepare a tensão antes da volta ao D7' },
+            { start: 11.5, end: 13.5, type: 'note', noteKey: 'D_F', step: 'D7 • terça menor de blues', tip: 'D+F cria cor blues sobre o acorde dominante' },
+            { start: 13.5, end: 15.5, type: 'note', noteKey: 'G_A', step: 'Resposta nas cordas agudas', tip: 'G+A: finalize a frase na 2ª e 1ª cordas' },
+            { start: 15.5, end: 51.5, type: 'playthrough', loopNum: 'Solo completo • 12 compassos', tip: 'Siga a progressão A7, D7 e E7; deixe cada double-stop soar' },
+            { start: 51.5, end: 54.0, type: 'outro', title: 'A7 • D7 • E7', subtitle: 'Solo original • Blues harmonizado em Lá' }
         ];
 
         const LESSONS = {
@@ -366,18 +343,21 @@
                 header: 'THE WHITE STRIPES • RIFF TUTORIAL',
                 noteLabel: 'Fret',
                 patternLabel: 'RIFF SEQUENCE (5TH STRING)',
+                startPrompt: '▶ Start Riff Lesson',
                 filename: 'seven-nation-army-720p.mp4'
             },
-            'pink-panther': {
-                notes: JAZZ_NOTES,
-                events: JAZZ_EVENTS,
-                timeline: JAZZ_TIMELINE,
-                title: 'Jazz Felino — Exercício Original',
-                artist: 'Estudo original em estilo jazz',
-                header: 'EXERCÍCIO ORIGINAL DE VIOLÃO • ESTILO JAZZ',
-                noteLabel: 'Casa',
-                patternLabel: 'SEQUÊNCIA (CORDA/CASA) • 6 CORDAS',
-                filename: 'exercicio-jazz-felino-720p.mp4'
+            'blues-solo': {
+                notes: BLUES_NOTES,
+                events: BLUES_EVENTS,
+                timeline: BLUES_TIMELINE,
+                sequenceDisplay: BLUES_SEQUENCE,
+                title: 'Solo Harmônico de Blues',
+                artist: 'Estudo original em Lá • 12 compassos',
+                header: 'SOLO ORIGINAL • BLUES HARMONIZADO',
+                noteLabel: 'Dupla',
+                patternLabel: 'BLUES DE 12 COMPASSOS • A7 / D7 / E7',
+                startPrompt: '▶ Iniciar solo de blues',
+                filename: 'solo-harmonico-blues-720p.mp4'
             }
         };
 
@@ -438,7 +418,7 @@
         function renderScene(targetCtx, w, h, t, pulseVal, currentNoteKey, seqIdx, isExport = false) {
             const scene = getCurrentScene(t);
 
-            // Fundo estilizado vermelho/preto/branco (The White Stripes)
+            // Fundo estilizado do tutorial.
             const bgGrad = targetCtx.createLinearGradient(0, 0, 0, h);
             bgGrad.addColorStop(0, '#18080a');
             bgGrad.addColorStop(0.5, '#09090b');
@@ -488,8 +468,8 @@
                 targetCtx.font = `500 ${Math.round(w * 0.036)}px Inter, sans-serif`;
                 targetCtx.fillText(scene.subtitle, w / 2, cardY + cardH * 0.50);
 
-                // Pílulas com a sequência do riff
-                const riffNotes = currentLesson.events.map(event => event.label);
+                // Pílulas com a sequência musical.
+                const riffNotes = currentLesson.sequenceDisplay || currentLesson.events.map(event => event.label);
                 const pillW = (w * 0.72) / riffNotes.length - 4;
                 const startX = (w - ((pillW + 4) * riffNotes.length - 4)) / 2;
 
@@ -499,13 +479,13 @@
                     roundRect(targetCtx, px, py, pillW, 34, 8, 'rgba(239, 68, 68, 0.22)', 'rgba(239, 68, 68, 0.55)');
                     targetCtx.fillStyle = '#ffffff';
                     targetCtx.font = `800 ${Math.round(w * 0.036)}px Inter, sans-serif`;
-                    targetCtx.fillText(n, px + pillW / 2, py + 22);
+                    targetCtx.fillText(typeof n === 'string' ? n : n.label, px + pillW / 2, py + 22);
                 });
 
                 if (scene.tip) {
                     targetCtx.fillStyle = '#d4d4d8';
                     targetCtx.font = `500 ${Math.round(w * 0.033)}px Inter, sans-serif`;
-                    targetCtx.fillText(scene.tip, w / 2, h * 0.71);
+                    wrapText(targetCtx, scene.tip, w / 2, h * 0.71, w * 0.84, 20);
                 }
             } else {
                 // CENAS DE NOTA ISOLADA OU PLAYTHROUGH
@@ -534,7 +514,7 @@
                 // Diagrama do braço (casas 2 a 10)
                 drawFretboard(targetCtx, w, h, noteObj, pulseVal);
 
-                // Barra com as 7 notas do riff sincronizadas
+                // Sequência musical sincronizada.
                 drawRiffPattern(targetCtx, w, h, seqIdx, scene.type === 'playthrough');
 
                 // Dica
@@ -549,7 +529,7 @@
                 roundRect(targetCtx, w * 0.22, h * 0.46, w * 0.56, 46, 23, '#dc2626', '#f87171');
                 targetCtx.fillStyle = '#ffffff';
                 targetCtx.font = `700 ${Math.round(w * 0.038)}px Inter, sans-serif`;
-                targetCtx.fillText('▶ Start Riff Lesson', w / 2, h * 0.46 + 29);
+                targetCtx.fillText(currentLesson.startPrompt, w / 2, h * 0.46 + 29);
             }
         }
 
@@ -577,13 +557,13 @@
             const fretSpacing = gridH / numFrets;
 
             const stringNames = ['E', 'A', 'D', 'G', 'B', 'e'];
-            const activeStringIndex = 6 - noteObj.fingers[0].string;
+            const activeStringIndices = new Set(noteObj.fingers.map(item => 6 - item.string));
             targetCtx.font = `700 ${Math.round(w * 0.028)}px Inter, sans-serif`;
             targetCtx.textAlign = 'center';
 
             for (let s = 0; s < numStrings; s++) {
                 const sx = startX + s * stringSpacing;
-                const isActiveString = s === activeStringIndex;
+                const isActiveString = activeStringIndices.has(s);
                 targetCtx.fillStyle = isActiveString ? '#ef4444' : '#71717a';
                 targetCtx.fillText(stringNames[s], sx, startY - 16);
 
@@ -622,7 +602,7 @@
             // Destaca a corda que está sendo tocada.
             for (let s = 0; s < numStrings; s++) {
                 const sx = startX + s * stringSpacing;
-                const isActiveString = s === activeStringIndex;
+                const isActiveString = activeStringIndices.has(s);
                 targetCtx.beginPath();
                 targetCtx.moveTo(sx, startY);
                 targetCtx.lineTo(sx, startY + gridH);
@@ -664,21 +644,28 @@
             targetCtx.font = `700 ${Math.round(w * 0.024)}px Inter, sans-serif`;
             targetCtx.fillText(currentLesson.patternLabel, w / 2, boxY + 16);
 
-            const stepW = (boxW - 24) / currentLesson.events.length;
+            const sequence = currentLesson.sequenceDisplay || currentLesson.events.map(event => event.label);
+            const stepW = (boxW - 24) / sequence.length;
             const startX = boxX + 12 + stepW / 2;
+            const activeSequenceIndex = currentLesson.sequenceDisplay && activeIdx >= 0
+                ? (currentLesson.events[activeIdx]?.bar || 1) - 1
+                : activeIdx;
 
-            currentLesson.events.forEach((ev, idx) => {
+            sequence.forEach((label, idx) => {
                 const x = startX + idx * stepW;
                 const y = boxY + boxH * 0.66;
-                const isActive = isLoop && idx === activeIdx;
+                const isActive = isLoop && idx === activeSequenceIndex;
 
                 if (isActive) {
                     roundRect(targetCtx, x - stepW * 0.42, y - 16, stepW * 0.84, 26, 8, 'rgba(239, 68, 68, 0.35)', '#ef4444');
                 }
 
                 targetCtx.fillStyle = isActive ? '#ffffff' : '#71717a';
-                targetCtx.font = `800 ${Math.round(w * (isActive ? 0.044 : 0.036))}px Inter, sans-serif`;
-                targetCtx.fillText(ev.label, x, y + 3);
+                const fontScale = currentLesson.sequenceDisplay
+                    ? (isActive ? 0.036 : 0.03)
+                    : (isActive ? 0.044 : 0.036);
+                targetCtx.font = `800 ${Math.round(w * fontScale)}px Inter, sans-serif`;
+                targetCtx.fillText(label, x, y + 3);
             });
         }
 
