@@ -245,79 +245,115 @@
         ];
 
         const JAZZ_NOTES = {
-            E_7: {
-                name: '7',
-                fullName: 'E note (5th string, 7th fret)',
-                notes: ['E3'],
-                strings: ['X', '7', 'X', 'X', 'X', 'X'],
-                fingers: [{ string: 5, fret: 7, finger: '1' }],
+            G_6_3: {
+                name: '3',
+                fullName: 'G note (6th string, 3rd fret)',
+                notes: ['G2'],
+                strings: ['3', 'X', 'X', 'X', 'X', 'X'],
+                fingers: [{ string: 6, fret: 3, finger: '2' }],
                 color: '#f0abfc'
             },
-            G_10: {
-                name: '10',
-                fullName: 'G note (5th string, 10th fret)',
-                notes: ['G3'],
-                strings: ['X', '10', 'X', 'X', 'X', 'X'],
-                fingers: [{ string: 5, fret: 10, finger: '4' }],
-                color: '#c4b5fd'
-            },
-            F_8: {
-                name: '8',
-                fullName: 'F note (5th string, 8th fret)',
-                notes: ['F3'],
-                strings: ['X', '8', 'X', 'X', 'X', 'X'],
-                fingers: [{ string: 5, fret: 8, finger: '2' }],
-                color: '#f9a8d4'
-            },
-            D_5: {
-                name: '5',
-                fullName: 'D note (5th string, 5th fret)',
-                notes: ['D3'],
-                strings: ['X', '5', 'X', 'X', 'X', 'X'],
-                fingers: [{ string: 5, fret: 5, finger: '1' }],
-                color: '#fdba74'
-            },
-            C_3: {
+            C_5_3: {
                 name: '3',
                 fullName: 'C note (5th string, 3rd fret)',
                 notes: ['C3'],
                 strings: ['X', '3', 'X', 'X', 'X', 'X'],
                 fingers: [{ string: 5, fret: 3, finger: '1' }],
+                color: '#c4b5fd'
+            },
+            G_4_5: {
+                name: '5',
+                fullName: 'G note (4th string, 5th fret)',
+                notes: ['G3'],
+                strings: ['X', 'X', '5', 'X', 'X', 'X'],
+                fingers: [{ string: 4, fret: 5, finger: '3' }],
+                color: '#f9a8d4'
+            },
+            C_3_5: {
+                name: '5',
+                fullName: 'C note (3rd string, 5th fret)',
+                notes: ['C4'],
+                strings: ['X', 'X', 'X', '5', 'X', 'X'],
+                fingers: [{ string: 3, fret: 5, finger: '1' }],
+                color: '#fdba74'
+            },
+            G_2_8: {
+                name: '8',
+                fullName: 'G note (2nd string, 8th fret)',
+                notes: ['G4'],
+                strings: ['X', 'X', 'X', 'X', '8', 'X'],
+                fingers: [{ string: 2, fret: 8, finger: '3' }],
                 color: '#fde68a'
             },
-            B_2: {
-                name: '2',
-                fullName: 'B note (5th string, 2nd fret)',
-                notes: ['B2'],
-                strings: ['X', '2', 'X', 'X', 'X', 'X'],
-                fingers: [{ string: 5, fret: 2, finger: '1' }],
+            C_1_8: {
+                name: '8',
+                fullName: 'C note (1st string, 8th fret)',
+                notes: ['C5'],
+                strings: ['X', 'X', 'X', 'X', 'X', '8'],
+                fingers: [{ string: 1, fret: 8, finger: '3' }],
+                color: '#a7f3d0'
+            },
+            A_2_10: {
+                name: '10',
+                fullName: 'A note (2nd string, 10th fret)',
+                notes: ['A4'],
+                strings: ['X', 'X', 'X', 'X', '10', 'X'],
+                fingers: [{ string: 2, fret: 10, finger: '4' }],
+                color: '#a7f3d0'
+            },
+            E_3_9: {
+                name: '9',
+                fullName: 'E note (3rd string, 9th fret)',
+                notes: ['E4'],
+                strings: ['X', 'X', 'X', '9', 'X', 'X'],
+                fingers: [{ string: 3, fret: 9, finger: '4' }],
+                color: '#f0abfc'
+            },
+            B_4_9: {
+                name: '9',
+                fullName: 'B note (4th string, 9th fret)',
+                notes: ['B3'],
+                strings: ['X', 'X', '9', 'X', 'X', 'X'],
+                fingers: [{ string: 4, fret: 9, finger: '4' }],
+                color: '#c4b5fd'
+            },
+            D_5_5: {
+                name: '5',
+                fullName: 'D note (5th string, 5th fret)',
+                notes: ['D3'],
+                strings: ['X', '5', 'X', 'X', 'X', 'X'],
+                fingers: [{ string: 5, fret: 5, finger: '1' }],
                 color: '#a7f3d0'
             }
         };
 
         const JAZZ_EVENTS = [
-            { at: 0.000, noteKey: 'D_5', label: '5', dur: 0.42 },
-            { at: 0.125, noteKey: 'F_8', label: '8', dur: 0.28 },
-            { at: 0.250, noteKey: 'E_7', label: '7', dur: 0.38 },
-            { at: 0.375, noteKey: 'G_10', label: '10', dur: 0.42 },
-            { at: 0.500, noteKey: 'F_8', label: '8', dur: 0.28 },
-            { at: 0.625, noteKey: 'D_5', label: '5', dur: 0.52 },
-            { at: 0.750, noteKey: 'C_3', label: '3', dur: 0.3 },
-            { at: 0.875, noteKey: 'B_2', label: '2', dur: 0.55 },
-            { at: 0.9375, noteKey: 'D_5', label: '5', dur: 0.38 }
+            { at: 0.000, noteKey: 'G_6_3', label: '6/3', dur: 0.42 },
+            { at: 0.083, noteKey: 'C_5_3', label: '5/3', dur: 0.3 },
+            { at: 0.166, noteKey: 'G_4_5', label: '4/5', dur: 0.38 },
+            { at: 0.250, noteKey: 'C_3_5', label: '3/5', dur: 0.42 },
+            { at: 0.333, noteKey: 'G_2_8', label: '2/8', dur: 0.3 },
+            { at: 0.416, noteKey: 'C_1_8', label: '1/8', dur: 0.52 },
+            { at: 0.500, noteKey: 'A_2_10', label: '2/10', dur: 0.3 },
+            { at: 0.583, noteKey: 'G_2_8', label: '2/8', dur: 0.38 },
+            { at: 0.666, noteKey: 'E_3_9', label: '3/9', dur: 0.42 },
+            { at: 0.750, noteKey: 'C_3_5', label: '3/5', dur: 0.3 },
+            { at: 0.833, noteKey: 'B_4_9', label: '4/9', dur: 0.52 },
+            { at: 0.916, noteKey: 'D_5_5', label: '5/5', dur: 0.5 }
         ];
 
         const JAZZ_TIMELINE = [
-            { start: 0, end: 3.5, type: 'intro', title: 'Jazz Felino', subtitle: 'Exercício original de violão • estilo jazz', tip: 'Melodia original com síncopes • Toque devagar e swingado' },
-            { start: 3.5, end: 6.5, type: 'note', noteKey: 'D_5', step: 'Nota 1 • Casa 5', tip: 'Comece na quinta casa da corda Lá' },
-            { start: 6.5, end: 9.5, type: 'note', noteKey: 'F_8', step: 'Nota 2 • Casa 8', tip: 'Alcance a oitava casa sem tensionar a mão' },
-            { start: 9.5, end: 12.5, type: 'note', noteKey: 'E_7', step: 'Nota 3 • Casa 7', tip: 'Volte uma casa e deixe a nota soar' },
-            { start: 12.5, end: 15.5, type: 'note', noteKey: 'G_10', step: 'Nota 4 • Casa 10', tip: 'Use o dedo mínimo para chegar à décima casa' },
-            { start: 15.5, end: 18.0, type: 'note', noteKey: 'C_3', step: 'Nota 5 • Casa 3', tip: 'Desça para a terceira casa mantendo o tempo' },
-            { start: 18.0, end: 22.0, type: 'playthrough', loopNum: 'Prática 1', tip: 'Toque as notas com dinâmica suave e sincopada' },
-            { start: 22.0, end: 26.0, type: 'playthrough', loopNum: 'Prática 2', tip: 'Repita o exercício e mantenha o pulso constante' },
-            { start: 26.0, end: 30.0, type: 'playthrough', loopNum: 'Prática 3', tip: 'Experimente acentuar levemente as notas fora do tempo' },
-            { start: 30.0, end: 32.0, type: 'outro', title: '5 - 8 - 7 - 10 - 8 - 5 - 3 - 2 - 5', subtitle: 'Exercício original • Continue praticando o swing' }
+            { start: 0, end: 3.5, type: 'intro', title: 'Jazz Felino', subtitle: 'Exercício original de violão • estilo jazz', tip: 'Sequência corda/casa • Melodia original com síncopes • Toque swingado' },
+            { start: 3.5, end: 6.0, type: 'note', noteKey: 'G_6_3', step: 'Nota 1 • 6ª corda', tip: 'Comece na 6ª corda (Mi grave), casa 3' },
+            { start: 6.0, end: 8.5, type: 'note', noteKey: 'C_5_3', step: 'Nota 2 • 5ª corda', tip: 'Passe para a 5ª corda (Lá), casa 3' },
+            { start: 8.5, end: 11.0, type: 'note', noteKey: 'G_4_5', step: 'Nota 3 • 4ª corda', tip: 'Toque a 4ª corda (Ré), casa 5' },
+            { start: 11.0, end: 13.5, type: 'note', noteKey: 'C_3_5', step: 'Nota 4 • 3ª corda', tip: 'Suba para a 3ª corda (Sol), casa 5' },
+            { start: 13.5, end: 16.0, type: 'note', noteKey: 'G_2_8', step: 'Nota 5 • 2ª corda', tip: 'Continue na 2ª corda (Si), casa 8' },
+            { start: 16.0, end: 18.5, type: 'note', noteKey: 'C_1_8', step: 'Nota 6 • 1ª corda', tip: 'Chegue à 1ª corda (Mi agudo), casa 8' },
+            { start: 18.5, end: 22.5, type: 'playthrough', loopNum: 'Prática 1', tip: 'Percorra as seis cordas com toque leve e regular' },
+            { start: 22.5, end: 26.5, type: 'playthrough', loopNum: 'Prática 2', tip: 'Repita a sequência sem acelerar nas cordas agudas' },
+            { start: 26.5, end: 30.5, type: 'playthrough', loopNum: 'Prática 3', tip: 'Mantenha a dinâmica suave e acentue o contratempo' },
+            { start: 30.5, end: 32.0, type: 'outro', title: 'Exercício original • 6 cordas', subtitle: 'Continue praticando o ritmo e as mudanças de corda' }
         ];
 
         const LESSONS = {
@@ -340,7 +376,7 @@
                 artist: 'Estudo original em estilo jazz',
                 header: 'EXERCÍCIO ORIGINAL DE VIOLÃO • ESTILO JAZZ',
                 noteLabel: 'Casa',
-                patternLabel: 'SEQUÊNCIA ORIGINAL (5ª CORDA)',
+                patternLabel: 'SEQUÊNCIA (CORDA/CASA) • 6 CORDAS',
                 filename: 'exercicio-jazz-felino-720p.mp4'
             }
         };
@@ -541,13 +577,14 @@
             const fretSpacing = gridH / numFrets;
 
             const stringNames = ['E', 'A', 'D', 'G', 'B', 'e'];
+            const activeStringIndex = 6 - noteObj.fingers[0].string;
             targetCtx.font = `700 ${Math.round(w * 0.028)}px Inter, sans-serif`;
             targetCtx.textAlign = 'center';
 
             for (let s = 0; s < numStrings; s++) {
                 const sx = startX + s * stringSpacing;
-                const isFifthString = s === 1;
-                targetCtx.fillStyle = isFifthString ? '#ef4444' : '#71717a';
+                const isActiveString = s === activeStringIndex;
+                targetCtx.fillStyle = isActiveString ? '#ef4444' : '#71717a';
                 targetCtx.fillText(stringNames[s], sx, startY - 16);
 
                 const state = noteObj.strings[s];
@@ -582,15 +619,15 @@
                 targetCtx.stroke();
             }
 
-            // Cordas verticais (destaque na 5ª corda - índice 1)
+            // Destaca a corda que está sendo tocada.
             for (let s = 0; s < numStrings; s++) {
                 const sx = startX + s * stringSpacing;
-                const isFifth = s === 1;
+                const isActiveString = s === activeStringIndex;
                 targetCtx.beginPath();
                 targetCtx.moveTo(sx, startY);
                 targetCtx.lineTo(sx, startY + gridH);
-                targetCtx.lineWidth = isFifth ? (2.6 + pulseVal * 1.4) : 1.1;
-                targetCtx.strokeStyle = isFifth ? '#ef4444' : 'rgba(255, 255, 255, 0.22)';
+                targetCtx.lineWidth = isActiveString ? (2.6 + pulseVal * 1.4) : 1.1;
+                targetCtx.strokeStyle = isActiveString ? '#ef4444' : 'rgba(255, 255, 255, 0.22)';
                 targetCtx.stroke();
             }
 
